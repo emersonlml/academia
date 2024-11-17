@@ -1,0 +1,26 @@
+{% block content %}
+  <h1>Listado de Materias</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Profesor</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for materia in materias %}
+        <tr>
+          <td>{{ materia.name }}</td>
+          <td>{{ materia.description }}</td>
+          <td>{{ materia.teacher.get_full_name }}</td>  <!-- Usamos get_full_name para mostrar nombre completo del profesor -->
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3">No se encontraron materias</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

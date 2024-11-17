@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container my-4">
+        <div class="row">
+            <div class="col">
+                <h2>Lista de Cursos</h2>
+                <h4>Total de cursos: 
+                {{ courses|length }}
+                </h4> <!-- Verifica cuántos cursos se están pasando -->
+
+            </div>
+            <div class="col">
+                <span class="float-end">
+                    {% if group_name == 'administrativos' %}
+                        <a class="btn btn-success" href="{% url 'course_create' %}">Agregar Curso</a>
+                        <a href="{% url 'materia_edit' %}" class="btn btn-primary">Editar Materias</a>
+
+                    {% endif %}
+                    {% if group_name == 'secretarias' %}
+                        <a class="btn btn-success" href="{% url 'course_create' %}">Agregar Curso</a>
+                        <a href="{% url 'materia_edit' %}" class="btn btn-primary">Editar Materias</a>
+
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <hr>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre del Curso</th>
+                    <th>Descripción</th>
+                    <th>Materias</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <!-- Nombre del curso clickeable -->
+                    <td>
+                        <a href="{% url 'course_detail' course.id %}">{{ course.name }}</a>
+                    </td>
+                    <!-- Descripción del curso -->
+                    <td>{{ course.description }}</td>
+                    <!-- Materias del curso -->
+                    <td>
+                        {% for materia in course.materias.all %}
+                            {{ materia.name }}{% if not forloop.last %} | {% endif %}
+                        {% endfor %}
+                    </td>
+                    <!-- Acciones -->
+                    <td>
+                        {% if group_name == 'estudiantes' and not course.is_enrolled %}
+                            <a class="btn btn-sm btn-success" href="{% url 'enroll_course' course.id %}">Anotarse</a>
+                        {% elif course.is_enrolled %}
+                            <a class="btn btn-sm btn-warning" href="{% url 'profile' %}">Ir al Perfil</a>
+                        {% endif %}
+            
+                        {% if group_name == 'administrativos' %}
+                            <!--<a class="btn btn-sm btn-warning" 
+                                href="{% url 'course_edit' course.id %}">Editar</a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'course_delete' course.id %}">Eliminar</a>
+                        {% elif group_name == 'secretarias' %}
+                            <a class="btn btn-sm btn-warning" href="{% url 'course_edit' course.id %}">Editar</a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'course_delete' course.id %}">Eliminar</a>
+                        {% endif %}-->
+                        <!-- Botón para ver materias -->
+                        <a class="btn btn-sm btn-info" href="{% url 'course_detail' course.id %}">Ver Materias</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No hay cursos disponibles.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

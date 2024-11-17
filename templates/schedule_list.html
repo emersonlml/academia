@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Archivos Subidos</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre del Archivo</th>
+                <th>Fecha de Carga</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+                <tr>
+                    <td>{{ schedule.name }}</td>
+                    <td>{{ schedule.uploaded_at }}</td>
+                    <td>
+                        <!-- Formulario para eliminar un archivo -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_file_id" value="{{ schedule.id }}">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--<a href="{% url 'upload_schedule' %}" class="btn btn-primary">Subir Nuevos Archivos</a>-->
+    <a class="btn btn-primary btn-sm" href="{% url 'profile' %}">Volver Atrás</a>
+
+</div>
+{% endblock %}

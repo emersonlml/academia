@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            text-align: center;
+            padding: 10px;
+            min-height: 50px;
+            position: relative;
+        }
+        .dropzone {
+            min-height: 50px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .materia {
+            background-color: #007bff;
+            color: white;
+            padding: 3px 8px;
+            margin: 5px;
+            cursor: grab;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .number {
+            opacity: 0.1; 
+            position: absolute; 
+            top: 5px; 
+            left: 5px; 
+            font-size: 20px; 
+            z-index: 1; 
+        }
+        .caja {
+            margin:20px auto 40px auto;    
+            border:1px solid #d9d9d9;
+            height:30px;
+            overflow: hidden;
+            width: 230px;
+            position:relative;
+         }
+         select {
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            height: 30px;
+            padding: 5px;
+            width: 250px;
+         }
+         select:focus{ outline: none;}
+         
+         .caja::after{
+             content:"\025be";
+             display:table-cell;
+             padding-top:7px;
+             text-align:center;
+             width:30px;
+             height:30px;
+             background-color:#d9d9d9;
+             position:absolute;
+             top:0;
+             right:0px;    
+             pointer-events: none;
+         }
+
+        /* Estilo de los checkboxes */
+        .form-check {
+            margin-right: 15px;
+            display: inline-block;
+        }
+
+        /* Estilo para la columna de números de horas */
+        td:first-child, th:first-child {
+            font-weight: bold;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Horario Semanal <span id="course-name"></span></h1>
+
+<!-- Seleccionar Curso -->
+<div>
+    <label for="course-select">Seleccionar Curso:</label>
+    <select class="caja" id="course-select" onchange="updateMaterias()">
+        <option value="">--Seleccione un curso--</option>
+        {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<!-- Listado de cursos con checkboxes -->
+<div class="d-flex justify-content-end">
+    <div>
+        {% for course in courses %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="{{ course.id }}" id="courseCheck{{ course.id }}">
+            <label class="form-check-label" for="courseCheck{{ course.id }}">
+                {{ course.name }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Materias disponibles -->
+<div id="materias-list">
+    <h3>Materias</h3>
+    <div id="materias" class="container">
+        {% for materia in classes %}
+            <div class="materia" data-id="{{ materia.id }}">{{ materia.name }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Tabla de horario -->
+<h3>Horario</h3>
+<div id="schedule-container">
+    <table id="horario">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+                <th>Sábado</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for slot in time_slots %}
+            <tr>
+                <td>{{ slot }}</td>
+                {% for day in days_of_week %}
+                <td class="dropzone" data-slot="{{ slot }}" data-day="{{ day }}">
+                    <span class="number">{{ loop.index }}</span>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Botón para descargar PDF -->
+<button class="btn btn-primary" id="generate-pdf">Descargar PDF</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script>
+    function updateMaterias() {
+        const courseSelect = document.getElementById('course-select');
+        const courseId = courseSelect.value;
+        const courseName = courseSelect.options[courseSelect.selectedIndex].text;
+
+        // Actualiza el nombre del curso mostrado
+        document.getElementById('course-name').textContent = courseName ? `- ${courseName}` : '';
+
+        // Llama a la vista para obtener las materias del curso seleccionado
+        if (courseId) {
+            fetch(`/get-materias/?course_id=${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const materiasContainer = document.getElementById('materias');
+                    materiasContainer.innerHTML = ''; // Limpia la lista actual de materias
+                    data.forEach(materia => {
+                        const materiaDiv = document.createElement('div');
+                        materiaDiv.className = 'materia';
+                        materiaDiv.setAttribute('data-id', materia.id);
+                        materiaDiv.textContent = materia.name;
+                        materiasContainer.appendChild(materiaDiv);
+                    });
+                })
+                .catch(error => console.error('Error al obtener materias:', error));
+        } else {
+            document.getElementById('materias').innerHTML = ''; // Limpia si no hay curso seleccionado
+        }
+    }
+
+    // Inicializa Dragula para mover elementos de materias a la tabla
+    var materias = document.querySelector('#materias');
+    var dropzones = document.querySelectorAll('.dropzone');
+
+    dragula([materias, ...dropzones])
+        .on('drop', function (el, target, source, sibling) {
+            if (target.classList.contains('dropzone')) {
+                var day = target.getAttribute('data-day');
+                var slot = target.getAttribute('data-slot');
+                var materiaId = el.getAttribute('data-id');
+
+                // Clona el elemento para que se pueda arrastrar de nuevo
+                var newElement = el.cloneNode(true);
+                target.appendChild(newElement);
+                console.log(`Materia ${el.textContent} asignada a ${day} en la hora ${slot}`);
+            }
+        });
+
+    // Función para generar el PDF del horario
+    document.getElementById('generate-pdf').addEventListener('click', function () {
+        const horarioContainer = document.getElementById('schedule-container');
+        const courseSelect = document.getElementById('course-select');
+        const courseName = courseSelect.options[courseSelect.selectedIndex].text || "Horario";
+
+        html2pdf()
+            .set({
+                margin: 1,
+                filename: `${courseName}.pdf`,  // Usa el nombre del curso seleccionado
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            })
+            .from(horarioContainer)
+            .save();
+    });
+</script>
+
+</body>
+
+</html>
+
+{% endblock %}

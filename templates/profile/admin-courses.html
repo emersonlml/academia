@@ -1,0 +1,139 @@
+{% block content %}
+<style>
+    .course-list-container {
+        margin-top: 2rem;
+    }
+
+    .course-list-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .course-list-header h2 {
+        font-size: 2.5rem;
+        color: #007bff;
+    }
+
+    .list-group-item {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        transition: background-color 0.3s, transform 0.3s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .list-group-item:hover {
+        background-color: #e9ecef;
+        transform: scale(1.02);
+    }
+
+    .list-group-item a {
+        font-size: 1.2rem;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .list-group-item a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div class="container course-list-container">
+     <div class="course-list-header">
+        <h4>Todos los Cursos... </h4>
+        <a class="btn btn-primary btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#uploadScheduleModal">Subir horario</a>
+        <a class="btn btn-danger btn-sm" href="{% url 'schedule_list' %}" >Edit horario</a>
+
+    </div>
+    <!-- Modal para subir archivos PDF -->
+    <div class="modal fade" id="uploadScheduleModal" tabindex="-1" aria-labelledby="uploadScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadScheduleModalLabel">Subir Archivo PDF</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'upload_schedule' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Selecciona archivos PDF:</label>
+                            <input type="file" name="file" id="file" class="form-control" accept=".pdf" multiple required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Subir</button>
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="filterCourses('Primero')">Primero</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="filterCourses('Segundo')">Segundo</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="filterCourses('Tercero')">Tercero</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="filterCourses('Cuarto')">Cuarto</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="filterCourses('Quinto')">Quinto</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="filterCourses('Sexto')">Sexto</a>
+        </li>
+    </ul>
+    <ul class="list-group" id="courseList">
+        {% for course in all_courses %}
+            <li class="list-group-item course-item" data-course-name="{{ course.name }}">
+                <a href="{% url 'course_detail' course.id %}">{{ course.name }}</a>
+                <!--<a class="btn btn-sm btn-warning" href="{% url 'course_edit' course.id %}">Editar </a>-->
+
+            </li>
+        {% endfor %}
+    </ul>
+    <div class="container">
+        <ul>
+            {% for schedule in schedules %}
+                <li>
+                    <a href="{{ schedule.file.url }}" target="_blank">{{ schedule.name }}</a> - Subido el {{ schedule.uploaded_at }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    function filterCourses(level) {
+        const courseItems = document.querySelectorAll('.course-item');
+
+        courseItems.forEach(item => {
+            if (item.getAttribute('data-course-name').includes(level)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+        
+        // Reset active class for nav links
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => link.classList.remove('active'));
+        document.querySelector(`.nav-link:contains('${level}')`).classList.add('active');
+    }
+</script>
+
+
+{% endblock %}

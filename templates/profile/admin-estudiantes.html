@@ -1,0 +1,59 @@
+{% block content %}
+<h2>Lista de estudiantes</h2>
+<p>Total de estdiantes: {{ user_profiles|length }}</p>
+
+<!-- Campo de búsqueda -->
+<div class="mb-4">
+    <input type="text" id="searchInput" class="form-control" placeholder="Buscar estudiante por nombre...">
+</div>
+
+{% if user_profiles %}
+    <table class="table" id="studentTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Nombre de Usuario</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_profile in user_profiles %}
+                {% for group in user_profile.user.groups.all %}
+                    {% if group.name == 'estudiantes' %}
+                        <tr class="table-success student-row">
+                            <th scope="row" class="student-name">{{ user_profile.user.get_full_name }}</th>
+                            <td>{{ user_profile.user.username }}</td>
+                            <td class="text-center">
+                                <a class="btn btn-sm btn-info" href="{% url 'user_details' user_profile.user.id %}">Ver Información</a>
+                                <a class="btn btn-sm btn-danger" href="{% url 'delete_user' user_profile.user.id %}">Eliminar</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No se encontraron usuarios.</p>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const studentRows = document.querySelectorAll('.student-row');
+
+        searchInput.addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+
+            studentRows.forEach(row => {
+                const studentName = row.querySelector('.student-name').textContent.toLowerCase();
+                if (studentName.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

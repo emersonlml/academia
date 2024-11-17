@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-3">
+        <h2 class="text-center mb-4">Listado de Alumnos - Materia: <strong>{{ materia }}</strong></h2>
+        <p>Profesor: <strong>{{ teacher_name }}</strong></p>
+        <p>{{ materia.description }}</p>
+        
+        <div class="text-center mb-3">
+            <a href="{% url 'generate_pdf_student_list' materia.id %}" class="btn btn-danger">
+                <img src="{% static 'images/pdf.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+                Generar PDF
+            </a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" class="align-middle text-center">Alumno</th>
+                        <th scope="col" class="text-center">Primer Trimestre</th>
+                        <th scope="col" class="text-center">Segundo Trimestre</th>
+                        <th scope="col" class="text-center">Tercer Trimestre</th>
+                        <th scope="col" class="text-center">Promedio final</th>
+                        <th scope="col" class="align-middle text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in student_data %}
+                        <tr>
+                            <th scope="row" class="align-middle">{{ data.last_name }} {{ data.first_name }}</th>
+                            <td class="text-center">{{ data.mark_1|default:"0" }}</td>
+                            <td class="text-center">{{ data.mark_2 |default:"0"}}</td>
+                            <td class="text-center">{{ data.mark_3 |default:"0"}}</td>
+                            <td class="text-center font-weight-bold">{{ data.average |default:"0"}}</td>
+                            <td class="text-center font-weight-bold">
+                                {% if data.average >= 51 %}
+                                    <span class="text-success">Aprobado</span>
+                                {% else %}
+                                    <span class="text-danger">Reprobado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'profile' %}">Volver Atrás</a>
+    </div>
+{% endblock %}

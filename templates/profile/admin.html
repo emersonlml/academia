@@ -1,0 +1,148 @@
+<!-- admin.html -->
+{% load static %}
+
+<div>
+  <h5>Perfil</h5>
+  
+
+  <h5>{{ group_name_singular|capfirst }}</h5>
+  <ul class="nav nav-tabs nav-fill">
+    <li class="nav-item">
+      <div class="d-flex align-items-center">
+        <h6 class="mb-0 me-3">
+          <img src="{% static 'images/nota.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+          Activar notas
+        </h6>
+        <form id="toggleForm" method="post" action="{% url 'toggle_add_notes' %}">
+          {% csrf_token %}
+          <input type="hidden" name="is_active" id="toggleInput" value="{{ allow_add_notes|yesno:"true,false" }}">
+          <div class="toggleContainer">
+            <input type="checkbox" id="switch" class="toggle" {% if allow_add_notes %}checked{% endif %}>
+            <label for="switch" class="switch"></label>
+          </div>
+        </form>
+      </div>
+    </li>
+    <!-- Otros elementos del perfil -->
+    <li class="nav-item">
+      <a class="nav-link active" href="#usuarios" data-bs-toggle="tab">
+        <img src="{% static 'images/user.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+        Usuarios
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#cursos" data-bs-toggle="tab">
+        <img src="{% static 'images/curso.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+        Cursos
+      </a>
+    </li>
+   <!--
+    <li class="nav-item">
+      <a class="nav-link" href="#materias" data-bs-toggle="tab">Materias</a>
+    </li>
+  -->
+  </ul>
+
+  <div class="tab-content"> 
+      <!--inicio-->
+      <div class="tab-pane fade show active mt-2" id="usuarios"> 
+        <a class="btn btn-primary" href="{% url 'add_user' %}">
+          <img src="{% static 'images/adduser.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+          Agregar Usuario
+        </a>
+
+
+        <ul class="nav nav-tabs" id="userTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="profesores-tab" data-bs-toggle="tab" href="#profesores" role="tab" aria-controls="profesores" aria-selected="true">Profesores</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="estudiantes-tab" data-bs-toggle="tab" href="#estudiantes" role="tab" aria-controls="estudiantes" aria-selected="false">Estudiantes</a>
+          </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="secretaria-tab" data-bs-toggle="tab" href="#secretaria" role="tab" aria-controls="secretaria" aria-selected="false">Secretaria</a>
+            </li>
+            
+        </ul>
+    
+        <div class="tab-content mt-3" id="userTabContent">
+            <!-- Profesores Tab Content -->
+            <div class="tab-pane fade show active" id="profesores" role="tabpanel" aria-labelledby="profesores-tab">
+                 {% include 'profile/admin-profesores.html' %}
+            </div>
+            <!-- Estudiantes Tab Content -->
+            <div class="tab-pane fade" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
+              {% include 'profile/admin-estudiantes.html' %}
+         </div>
+            <!-- Secretaria Tab Content -->
+            <div class="tab-pane fade" id="secretaria" role="tabpanel" aria-labelledby="secretaria-tab">
+                 {% include 'profile/admin-secretaria.html' %}
+            </div>
+            
+        </div>
+    </div>
+    
+      <!--fin-->
+      <div class="tab-pane fade show mt-2" id="cursos">
+        {% include 'profile/admin-courses.html' %}
+      </div> 
+      
+    </div>
+
+  <style>
+    .toggleContainer {
+      position: relative;
+      width: 90px;
+      height: 30px;
+      display: inline-block;
+    }
+
+    .toggle {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    .toggle + .switch {
+      position: relative;
+      display: block;
+      background: red;
+      width: 90px;
+      height: 30px;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: background 0.5s;
+    }
+
+    .toggle + .switch:after {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #fff;
+      border-radius: 50%;
+      margin: 0px 2px;
+      left: 0%;
+      transition: 0.5s;
+    }
+
+    .toggle:checked + .switch {
+      background: green;
+    }
+
+    .toggle:checked + .switch:after {
+      left: calc(100% - 30px);
+    }
+  </style>
+
+  <script>
+    document.getElementById('switch').addEventListener('change', function() {
+      var isActive = this.checked;
+      document.getElementById('toggleInput').value = isActive ? 'true' : 'false';
+      document.getElementById('toggleForm').submit();
+    });
+  </script>
+</div>

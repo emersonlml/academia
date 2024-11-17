@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+{% include 'previa_del_estudiante_modal.html' %}
+
+{% block content %}
+
+<style>
+    .course-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .course-header h1 {
+        font-size: 3rem;
+        color: #007bff;
+    }
+
+    .course-header p {
+        font-size: 1.25rem;
+        color: #6c757d;
+    }
+
+    .course-materias h2 {
+        font-weight: bold;
+        color: #6c757d;
+    }
+
+    .list-group-item {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        position: relative; /* Necesario para que el botón se alinee correctamente */
+        padding-right: 5rem; /* Opcional: Ajusta espacio para evitar superposición */
+    }
+    
+    .btn-students {
+        position: absolute;
+        right: 1rem; /* Ajusta según la distancia deseada del borde derecho */
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        background-color: #17a2b8;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    
+    .btn-students:hover {
+        background-color: #138496;
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    
+</style>
+
+<div class="container mt-4">
+    <div class="course-header">
+        <h1>Curso: {{ course.name }}</h1>
+        <p>{{ course.description }}</p>
+    </div>
+
+    <hr class="my-4">
+    <div class="course-materias mt-5">
+        <h2>Materias del curso {{ course.name }}</h2>
+        <ul class="list-group mt-3">
+            {% for materia in materias|dictsort:"id" %}
+            <li class="list-group-item">
+                <span>{{ materia.name }}</span>
+                <a href="{% url 'materia_detail' materia.id %}" class="btn-students">Ver estudiantes...</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'generate_course_excel' course.id %}" class="btn btn-info">
+            <img src="{% static 'images/excel.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+            Generar Excel
+        </a>
+        <!-- Botón para abrir el modal -->
+        <button onclick="openStudentModal({{ course.id }})" class="btn btn-info">Vista previa de estudiantes</button>
+    </div>
+
+    <form method="POST" action="{% url 'profile' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary w-10">Volver Atrás</button>
+    </form>
+</div>
+
+<!-- Modal HTML -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentModalLabel">Vista previa de estudiantes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Estudiantes Aprobados (Promedio > 51)</h6>
+                <ul id="eligibleStudentsList"></ul>
+
+                <h6>Estudiantes Reprobados</h6>
+                <ul id="ineligibleStudentsList"></ul>
+            </div>
+            <div class="modal-footer">
+                <a id="downloadCsvLink" href="#" class="btn btn-info">Descargar CSV</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openStudentModal(courseId) {
+        fetch(`/generate_course_preview/${courseId}/`)
+            .then(response => response.json())
+            .then(data => {
+                const eligibleList = document.getElementById('eligibleStudentsList');
+                const ineligibleList = document.getElementById('ineligibleStudentsList');
+
+                eligibleList.innerHTML = '';
+                ineligibleList.innerHTML = '';
+
+                data.eligible_students.forEach(student => {
+                    eligibleList.innerHTML += `<li>${student.firstname} ${student.lastname} - ${student.email}</li>`;
+                });
+
+                data.ineligible_students.forEach(student => {
+                    ineligibleList.innerHTML += `<li>${student.firstname} ${student.lastname} - ${student.email}</li>`;
+                });
+
+                // Set the download link URL for CSV
+                document.getElementById('downloadCsvLink').href = `/download_course_csv/${courseId}/`;
+
+                // Show the modal
+                $('#studentModal').modal('show');
+            })
+            .catch(error => console.error('Error fetching student data:', error));
+    }
+</script>
+
+<!-- Cargar jQuery y Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

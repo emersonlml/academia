@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Lista de Entradas y Salidas</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Profesor</th>
+                <th>Hora de Entrada</th>
+                <th>Hora de Salida</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendance in attendances %}
+                <tr>
+                    <td>{{ attendance.teacher.username }}</td>
+                    <td>{{ attendance.entry_time }}</td>
+                    <td>{{ attendance.exit_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'generate_attendance_pdf' %}" class="btn btn-primary">Generar PDF</a>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Horario del Curso: {{ course.name }}</h2>
+    
+    <h3>Archivos de Horario:</h3>
+    
+    <ul>
+        {% for schedule in schedules %}
+            <li>
+                <a href="{{ schedule.file.url }}" target="_blank">{{ schedule.name }}</a>
+                (Subido el: {{ schedule.uploaded_at }})
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

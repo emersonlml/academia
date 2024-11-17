@@ -1,0 +1,70 @@
+
+{% block content %}
+    <h2>Lista de Profesores</h2>
+    <p>Total de profesores: {{ user_profiles|length }}</p>
+
+    <!-- Formulario de búsqueda -->
+    <div class="mb-3">
+        <div class="input-group">
+            <input type="text" id="search-input" class="form-control" placeholder="Buscar por nombre o apellido">
+        </div>
+    </div>
+
+    <table class="table" id="profesores-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Nombre de Usuario</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="profesores-body">
+            <!-- Llenado de la tabla al cargar la página -->
+            {% for user_profile in user_profiles %}
+                {% for group in user_profile.groups %}
+                    {% if group.name == 'profesores' %}
+                        <tr class="table-success">
+                            <th scope="row">{{ user_profile.user.get_full_name }}</th>
+                            <td>{{ user_profile.user.username }}</td>
+                            <td class="text-center">
+                                <a class="btn btn-sm btn-info" href="{% url 'user_details' user_profile.user.id %}">Ver Información</a> 
+                                <a class="btn btn-sm btn-danger" href="{% url 'delete_user' user_profile.user.id %}">Eliminar</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p id="no-results" style="display: none;">No se encontraron profesores.</p>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById('search-input');
+            const profesoresBody = document.getElementById('profesores-body');
+            const noResults = document.getElementById('no-results');
+
+            searchInput.addEventListener('input', function () {
+                const query = searchInput.value.trim().toLowerCase();
+
+                // Filtrar las filas de la tabla
+                const rows = profesoresBody.querySelectorAll('tr');
+                let anyVisible = false;
+
+                rows.forEach(row => {
+                    const fullName = row.querySelector('th').textContent.toLowerCase();
+                    if (fullName.includes(query)) {
+                        row.style.display = '';
+                        anyVisible = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Mostrar u ocultar el mensaje de "no resultados"
+                noResults.style.display = anyVisible ? 'none' : 'block';
+            });
+        });
+    </script>
+{% endblock %}

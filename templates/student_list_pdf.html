@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Alumnos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-text {
+            text-align: left;
+        }
+
+        .header-text h3, .header-text p {
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-text {
+            font-size: 14px;
+        }
+
+        .header img {
+            max-width: 150px;  /* Ajusta el tamaño de la imagen */
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+        .signature-section {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .date-time {
+            font-size: 12px;
+            text-align: right;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    {% load static %}
+
+    <!-- Cabecera -->
+    <div class="header">
+        <div class="header-text">
+            <h3>Unidad Educativa<br>Antonio Díaz Villamil</h3>
+            <p>
+                <strong>Nivel:</strong> Secundario 
+                <strong>RED:</strong> 303 
+                <strong>SIE:</strong> 80730194 
+                <strong>DISTRITO:</strong> La Paz 3
+            </p>
+            
+        </div>
+        <div class="header-image">
+            <img src="{{ watermark_url }}" alt="Marca de agua al lado del título">
+        </div>
+    </div>
+
+    <h1>Listado de Alumnos</h1>
+    <h2>Materia: {{ materia.name }}</h2>
+    <p><strong>Profesor:</strong> {{ teacher }}</p>
+    <p><strong>Descripción:</strong> {{ materia.description }}</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Primer Trimestre</th>
+                <th>Segundo Trimestre</th>
+                <th>Tercer Trimestre</th>
+                <th>Promedio Final</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in student_data %}
+                <tr>
+                    <td>{{ student.last_name }}</td>
+                    <td>{{ student.first_name }}</td>
+                    <td>{{ student.mark_1 }}</td>
+                    <td>{{ student.mark_2 }}</td>
+                    <td>{{ student.mark_3 }}</td>
+                    <td>{{ student.average }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+        <!-- Sección de firma del profesor -->
+        <div class="signature-section">
+            <p><strong>Profesor:</strong> {{ teacher }}</p>
+            <br>
+            <br>
+            <p>Firma: ______________________________</p>
+        </div>
+
+        <!-- Pie de página con la fecha y hora de generación -->
+        <footer>
+            <p>Generado el: {{ date_time }}</p>
+        </footer>
+</body>
+</html>

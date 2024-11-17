@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    
+    <div class="row">
+      
+        <!-- Columna izquierda: Texto y botones -->
+        <div class="col-md-6">
+            <h1 class="display-4 fw-normal text-body-emphasis text-center">Bienvenidos al colegio ADV</h1>
+            <h2 class="display-10 fw-normal text-body text-center">Este es un sistema de control Académico y Administrativo</h2>
+
+            <h3 class="text-center">
+                Fecha y hora actual:
+                <span id="current_time"></span>
+            </h3>
+          
+            <script>
+                function updateTime() {
+                    const now = new Date();
+                    const formattedTime = now.getFullYear() + '-' +
+                                          ('0' + (now.getMonth() + 1)).slice(-2) + '-' +
+                                          ('0' + now.getDate()).slice(-2) + ' ' +
+                                          ('0' + now.getHours()).slice(-2) + ':' +
+                                          ('0' + now.getMinutes()).slice(-2) + ':' +
+                                          ('0' + now.getSeconds()).slice(-2);
+                    document.getElementById('current_time').textContent = formattedTime;
+                }
+
+                setInterval(updateTime, 1000);  // Actualizar cada segundo
+                updateTime();  // Mostrar inmediatamente
+            </script>
+
+            <!-- Botones de acción -->
+            {% include 'action_buttons.html' %}
+        </div>
+
+        {% if user.is_authenticated and group_name == 'estudiantes' %}
+        <!-- Mostrar botón de materias asignadas para estudiantes -->
+        <div class="col-md-6 container-centered">
+            <a class="boton-curso" href="{% url 'profile' %}">
+                <img src="{% static 'images/materias.png' %}" alt="Materias">
+                <p>Materias Asignadas</p>
+            </a>
+        </div>
+    {% elif user.is_authenticated and group_name == 'profesores' %}
+        <!-- Mostrar botón de cursos asignados para profesores -->
+        <div class="col-md-6 container-centered">
+            <a class="boton-curso" href="{% url 'profile' %}">
+                <img src="{% static 'images/cursos.png' %}" alt="Cursos">
+                <p>Cursos Asignados</p>
+            </a>
+        </div>
+  
+        <!-- Si el usuario no está autenticado mostramos el carrusel -->
+        {% else %}
+        <!-- Columna derecha: Carrusel -->
+        <div class="col-md-6">
+            <div class="slideshow-container">
+                <div class="mySlides">
+                    <img src="media/carrusel/1.jpg" class="carousel-image drop box">
+                </div>
+
+                <div class="mySlides">
+                    <img src="media/carrusel/2.jpg" class="carousel-image drop box">
+                </div>
+
+                <div class="mySlides">
+                    <img src="media/carrusel/6.jpg" class="carousel-image drop box">
+                </div>
+                
+                <div class="mySlides">
+                    <img src="media/carrusel/3.jpg" class="carousel-image drop box">
+                </div>
+
+                <a class="prev" onclick="plusSlides(-1)">❮</a>
+                <a class="next" onclick="plusSlides(1)">❯</a>
+            </div>
+
+            <br>
+
+            <div style="text-align:center">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+
+<!-- Script de carrusel -->
+<script>
+let slideIndex = 0;
+showSlides();
+
+// Cambiar la imagen automáticamente cada 3 segundos
+setInterval(() => {
+  plusSlides(1);
+}, 3000);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides() {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  
+  // Resetear al principio si se llega al final
+  if (slideIndex >= slides.length) { slideIndex = 0 }
+  if (slideIndex < 0) { slideIndex = slides.length - 1 }
+  
+  // Ocultar todas las imágenes
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+
+  // Desactivar los puntos
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+
+  // Mostrar la imagen actual y activar el punto correspondiente
+  slides[slideIndex].style.display = "block";
+  if (dots[slideIndex]) {
+    dots[slideIndex].className += " active";
+  }
+}
+</script>
+
+<!-- Estilos -->
+<style>
+/* Estilo para las imágenes más pequeñas */
+.carousel-image {
+    width: 80%; /* Cambia el tamaño de la imagen */
+    height: auto; /* Mantiene la proporción de la imagen */
+    margin: 0 auto; /* Centra la imagen */
+    display: block;
+}
+
+.slideshow-container {
+    position: relative;
+    margin: auto;
+}
+
+/* Estilo para las flechas de navegación */
+.prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    padding: 16px;
+    margin-top: -22px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+}
+
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+    background-color: rgba(0,0,0,0.8);
+}
+
+/* Estilo para los puntos del carrusel */
+.dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+    background-color: #717171;
+}
+
+/* Estilo para centrar el contenido */
+.container-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px); /* Ajustar a la altura del área blanca */
+    flex-direction: column;
+}
+
+.boton-curso {
+    display: inline-block;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    text-align: center;
+    width: 150px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para dar efecto flotante */
+}
+
+.boton-curso img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.boton-curso p {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+</style>
+
+{% endblock %}

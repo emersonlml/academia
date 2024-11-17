@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>{{ materia.name }}</h2>
+   
+    <h4>Profesor: {{ teacher.get_full_name }}</h4> <!-- Mostrar el nombre completo del profesor -->
+    <h3>Estudiantes Inscritos.....</h3>
+    <ul>
+        {% for registration in estudiantes %}
+            <li>{{ registration.student.get_full_name }}</li> <!-- Mostrar nombre completo de estudiantes -->
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% load crispy_forms_tags %}
+    <div class="container my-4">
+        <h2 class="text-center">Editar Curso</h2>
+
+        <form action="" method="post" class="mx-auto" style="max-width: 600px;">
+            {% csrf_token %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Modificar Campos</h5>
+
+                    <!-- Campo de nombre -->
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Nombre del Curso</label>
+                        <input type="text" name="name" class="form-control" id="id_name" value="{{ form.name.value }}">
+                    </div>
+
+                    <!-- Campo de descripción -->
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Descripción</label>
+                        <input type="text" name="description" class="form-control" id="id_description" maxlength="20" value="{{ form.description.value }}">
+                    </div>
+
+                    <!-- Checkbox de materias -->
+                    <div class="mb-3">
+                        <label for="id_materias" class="form-label">Materias</label>
+                        <div class="form-check">
+                            {{ form.materias }}
+                        </div>
+                    </div>
+
+                    <!-- Botón de submit -->
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

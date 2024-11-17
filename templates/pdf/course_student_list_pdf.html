@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Estudiantes y Notas</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 20mm;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Listado de Estudiantes - Curso: {{ course.name }}</h1>
+        <p>Descripción: {{ course.description }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Estudiante</th>
+                {% for materia in materias %}
+                    <th colspan="4">{{ materia.name }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for materia in materias %}
+                <th>Primer Trimestre</th>
+                <th>Segundo Trimestre</th>
+                <th>Tercer Trimestre</th>
+                <th>Promedio Final </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td>{{ student.student.get_full_name }}</td>
+                    {% for materia in materias %}
+                        {% with student.marks|dictsort:"materia.id"|first as mark %}
+                            <td>{{ mark.mark_1 }}</td>
+                            <td>{{ mark.mark_2 }}</td>
+                            <td>{{ mark.mark_3 }}</td>
+                            <td>{{ mark.average }}</td>
+                        {% endwith %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Editar Materia</h2>
+
+    <!-- Mostrar mensajes de éxito -->
+    {% if messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Formulario para seleccionar el curso -->
+                    <form method="get" action="" class="mb-4">
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Selecciona un Curso:</label>
+                            <select name="course" id="course" class="form-select" required onchange="this.form.submit()">
+                                <option value="" selected disabled>-- Selecciona un curso --</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Por favor selecciona un curso.
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if materias %}
+                        <!-- Formulario para seleccionar la materia -->
+                        <form method="get" action="" class="mb-4">
+                            <div class="mb-3">
+                                <label for="materia" class="form-label">Selecciona una Materia:</label>
+                                <select name="materia" id="materia" class="form-select" required onchange="this.form.submit()">
+                                    <option value="" selected disabled>-- Selecciona una materia --</option>
+                                    {% for materia in materias %}
+                                        <option value="{{ materia.id }}" {% if request.GET.materia == materia.id|stringformat:"s" %}selected{% endif %}>{{ materia.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor selecciona una materia.
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                    {% if form %}
+                        <h3>Editar Materia</h3>
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            <input type="hidden" name="materia" value="{{ request.GET.materia }}">
+                            <input type="hidden" name="course" value="{{ request.GET.course }}">
+
+                            <div class="mb-3">
+                                {{ form.as_p }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </form>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Botón de volver atrás colocado al final del formulario -->
+<div class="mt-3 text-start"> <!-- Ajustamos el texto a la izquierda -->
+    <a class="btn btn-primary btn-sm" href="{% url 'profile' %}">Volver Atrás</a>
+</div>
+{% endblock %}

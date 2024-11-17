@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Lista de Estudiantes en {{ materia.name }}</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in student_data %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No se encontraron estudiantes.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

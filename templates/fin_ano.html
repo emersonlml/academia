@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<style>
+    .button-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .button-list li {
+        margin-bottom: 20px;
+    }
+
+    .button-list h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+    }
+
+    .button-list a:hover {
+        background-color: #218838;
+    }
+    /*
+        CSS for the main interaction
+        */
+        .tabset > input[type="radio"] {
+            position: absolute;
+            left: -200vw;
+        }
+        
+        .tabset .tab-panel {
+            display: none;
+        }
+        
+        .tabset > input:first-child:checked ~ .tab-panels > .tab-panel:first-child,
+        .tabset > input:nth-child(3):checked ~ .tab-panels > .tab-panel:nth-child(2),
+        .tabset > input:nth-child(5):checked ~ .tab-panels > .tab-panel:nth-child(3),
+        .tabset > input:nth-child(7):checked ~ .tab-panels > .tab-panel:nth-child(4),
+        .tabset > input:nth-child(9):checked ~ .tab-panels > .tab-panel:nth-child(5),
+        .tabset > input:nth-child(11):checked ~ .tab-panels > .tab-panel:nth-child(6) {
+            display: block;
+        }
+        
+        /*
+        Styling
+        */
+        body {
+            font: 16px/1.5em "Overpass", "Open Sans", Helvetica, sans-serif;
+            color: #333;
+            font-weight: 300;
+        }
+        
+        .tabset > label {
+            position: relative;
+            display: inline-block;
+            padding: 15px 15px 25px;
+            border: 1px solid transparent;
+            border-bottom: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .tabset > label::after {
+            content: "";
+            position: absolute;
+            left: 15px;
+            bottom: 10px;
+            width: 22px;
+            height: 4px;
+            background: #8d8d8d;
+        }
+        
+        input:focus-visible + label {
+            outline: 2px solid rgba(0,102,204,1);
+            border-radius: 3px;
+        }
+        
+        .tabset > label:hover,
+        .tabset > input:focus + label,
+        .tabset > input:checked + label {
+            color: #06c;
+        }
+        
+        .tabset > label:hover::after,
+        .tabset > input:focus + label::after,
+        .tabset > input:checked + label::after {
+            background: #06c;
+        }
+        
+        .tabset > input:checked + label {
+            border-color: #ccc;
+            border-bottom: 1px solid #fff;
+            margin-bottom: -1px;
+        }
+        
+        .tab-panel {
+            padding: 30px 0;
+            border-top: 1px solid #ccc;
+        }
+        
+        .tabset {
+            max-width: 65em;
+        }
+</style>
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h2 class="mb-0">Unidad Educativa Antonio Díaz Villamil</h2>
+            <ul class="button-list">
+                <li><h3>Lista de alumnos aprobados de 6to</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal6to">
+                        Obtener alumnos de 6to
+                    </button>
+                </li>
+                <li><h3>Lista de alumnos aprobados 5to de 6to</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal5to">
+                        Obtener alumnos de 5to
+                    </button>
+                </li>
+                <li><h3>Lista de alumnos aprobados de 4to a 5to</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal4to">
+                        Obtener alumnos de 4to
+                    </button>
+                </li>
+                <li><h3>Lista de alumnos aprobados de 3ro a 4to</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal3to">
+                        Obtener alumnos de 3to
+                    </button>
+                </li>
+                <li><h3>Lista de alumnos aprobados de 2do a 3ro</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal2to">
+                        Obtener alumnos de 2to
+                    </button>
+                </li>
+                <li><h3>Lista de alumnos de 1ro a 2do</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal1to">
+                        Obtener alumnos de 1to
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+            <!-- Modal para 6to -->
+    <div class="modal fade" id="modal6to" tabindex="-1" aria-labelledby="modal6toLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal6toLabel">Alumnos de 6to</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="tabset">
+                        <input type="radio" name="tabset6" id="tab6a" aria-controls="A6" checked>
+                        <label for="tab6a">Sexto-A</label>
+                        <input type="radio" name="tabset6" id="tab6b" aria-controls="B6">
+                        <label for="tab6b">Sexto-B</label>
+                        <input type="radio" name="tabset6" id="tab6c" aria-controls="C6">
+                        <label for="tab6c">Sexto-C</label>
+                        <input type="radio" name="tabset6" id="tab6d" aria-controls="D6">
+                        <label for="tab6d">Sexto-D</label>
+                        <div class="tab-panels">
+                            <section id="A6" class="tab-panel">
+                                <h2 class="fs-6">Lista Sexto A</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="B6" class="tab-panel">
+                                <h2 class="fs-6">Lista Sexto B</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="C6" class="tab-panel">
+                                <h2 class="fs-6">Lista Sexto C</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="D6" class="tab-panel">
+                                <h2 class="fs-6">Lista Sexto D</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para 5to -->
+    <div class="modal fade" id="modal5to" tabindex="-1" aria-labelledby="modal5toLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal5toLabel">Alumnos de 5to</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="tabset">
+                        <input type="radio" name="tabset5" id="tab5a" aria-controls="A5" checked>
+                        <label for="tab5a">Quinto-A</label>
+                        <input type="radio" name="tabset5" id="tab5b" aria-controls="B5">
+                        <label for="tab5b">Quinto-B</label>
+                        <input type="radio" name="tabset5" id="tab5c" aria-controls="C5">
+                        <label for="tab5c">Quinto-C</label>
+                        <input type="radio" name="tabset5" id="tab5d" aria-controls="D5">
+                        <label for="tab5d">Quinto-D</label>
+                        <div class="tab-panels">
+                            <section id="A5" class="tab-panel">
+                                <h2 class="fs-6">Lista Quinto A</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="B5" class="tab-panel">
+                                <h2 class="fs-6">Lista Quinto B</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="C5" class="tab-panel">
+                                <h2 class="fs-6">Lista Quinto C</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                            <section id="D5" class="tab-panel">
+                                <h2 class="fs-6">Lista Quinto D</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+                    <button type="button" class="btn btn-primary">Generar CSV</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+     <!-- Modal para 4to -->
+<div class="modal fade" id="modal4to" tabindex="-1" aria-labelledby="modal4toLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal4toLabel">Alumnos de 4to</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabset">
+                    <!-- Tab 1 -->
+                    <input type="radio" name="tabset4" id="tab4a" aria-controls="A4" checked>
+                    <label for="tab4a">Cuarto-A</label>
+                    <!-- Tab 2 -->
+                    <input type="radio" name="tabset4" id="tab4b" aria-controls="B4">
+                    <label for="tab4b">Cuarto-B</label>
+                    <!-- Tab 3 -->
+                    <input type="radio" name="tabset4" id="tab4c" aria-controls="C4">
+                    <label for="tab4c">Cuarto-C</label>
+                    <!-- Tab 4 -->
+                    <input type="radio" name="tabset4" id="tab4d" aria-controls="D4">
+                    <label for="tab4d">Cuarto-D</label>
+                    <div class="tab-panels">
+                        <section id="A4" class="tab-panel">
+                          <h2 class="fs-6">Lista Cuarto A</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                        </section>
+                        <section id="B4" class="tab-panel">
+                            <h2 class="fs-6">Lista Cuarto B</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                        </section>
+                        <section id="C4" class="tab-panel">
+                            <h2 class="fs-6">Lista Cuarto C</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="D4" class="tab-panel">
+                            <h2 class="fs-6">Lista Cuarto D</h2>
+                                <ul class="list-unstyled small">
+                                    <li>- Estudiante 1</li>
+                                    <li>- Estudiante 2</li>
+                                </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+
+                <button type="button" class="btn btn-primary">Generar CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para 3ro -->
+<div class="modal fade" id="modal3to" tabindex="-1" aria-labelledby="modal3toLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal3toLabel">Alumnos de 3ro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabset">
+                    <input type="radio" name="tabset3" id="tab3a" aria-controls="A3" checked>
+                    <label for="tab3a">Tercero-A</label>
+                    <input type="radio" name="tabset3" id="tab3b" aria-controls="B3">
+                    <label for="tab3b">Tercero-B</label>
+                    <input type="radio" name="tabset3" id="tab3c" aria-controls="C3">
+                    <label for="tab3c">Tercero-C</label>
+                    <input type="radio" name="tabset3" id="tab3d" aria-controls="D3">
+                    <label for="tab3d">Tercero-D</label>
+                    <div class="tab-panels">
+                        <section id="A3" class="tab-panel">
+                            <h2 class="fs-6">Lista Tercero A</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="B3" class="tab-panel">
+                            <h2 class="fs-6">Lista Tercero B</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="C3" class="tab-panel">
+                            <h2 class="fs-6">Lista Tercero C</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="D3" class="tab-panel">
+                            <h2 class="fs-6">Lista Tercero D</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+
+                <button type="button" class="btn btn-primary">Generar CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para 2do -->
+<div class="modal fade" id="modal2to" tabindex="-1" aria-labelledby="modal2toLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal2toLabel">Alumnos de 2do</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabset">
+                    <input type="radio" name="tabset2" id="tab2a" aria-controls="A2" checked>
+                    <label for="tab2a">Segundo-A</label>
+                    <input type="radio" name="tabset2" id="tab2b" aria-controls="B2">
+                    <label for="tab2b">Segundo-B</label>
+                    <input type="radio" name="tabset2" id="tab2c" aria-controls="C2">
+                    <label for="tab2c">Segundo-C</label>
+                
+                    <div class="tab-panels">
+                        <section id="A2" class="tab-panel">
+                            <h2 class="fs-6">Lista Segundo A</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="B2" class="tab-panel">
+                            <h2 class="fs-6">Lista Segundo B</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="C2" class="tab-panel">
+                            <h2 class="fs-6">Lista Segundo C</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+
+                <button type="button" class="btn btn-primary">Generar CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para 1ro -->
+<div class="modal fade" id="modal1to" tabindex="-1" aria-labelledby="modal1toLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal1toLabel">Alumnos de 1ro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="tabset">
+                    <input type="radio" name="tabset1" id="tab1a" aria-controls="A1" checked>
+                    <label for="tab1a">Primero-A</label>
+                    <input type="radio" name="tabset1" id="tab1b" aria-controls="B1">
+                    <label for="tab1b">Primero-B</label>
+                    <input type="radio" name="tabset1" id="tab1c" aria-controls="C1">
+                    <label for="tab1c">Primero-C</label>
+                    
+                    <div class="tab-panels">
+                        <section id="A1" class="tab-panel">
+                            <h2 class="fs-6">Lista Primero A</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="B1" class="tab-panel">
+                            <h2 class="fs-6">Lista Primero B</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        <section id="C1" class="tab-panel">
+                            <h2 class="fs-6">Lista Primero C</h2>
+                            <ul class="list-unstyled small">
+                                <li>- Estudiante 1</li>
+                                <li>- Estudiante 2</li>
+                            </ul>
+                        </section>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger">Eliminar Alumnos</button>
+
+                <button type="button" class="btn btn-primary">Generar CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="card-footer text-muted text-center">
+            <small>© 2024 Unidad Educativa Antonio Díaz Villamil</small>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

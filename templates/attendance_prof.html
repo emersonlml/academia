@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h2>Lista de Entradas y Salidas de Profesores</h2>
+
+<style>
+    /* Estilos generales */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+    }
+    h2 {
+        color: #333;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    /* Estilo para la tabla */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px auto;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 6px;
+        font-size: 0.9em;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    th {
+        background-color: #04AA6D;
+        color: white;
+    }
+
+    /* Estilo para el enlace de volver */
+    .btn-secondary {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 12px;
+        font-size: 0.8em;
+        text-decoration: none;
+        color: #fff;
+        background-color: #007bff;
+        border-radius: 5px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #0056b3;
+    }
+</style>
+<div class="form-container">
+    <form method="GET" action="{% url 'attendance_prof' %}">
+        <label for="start_date">Fecha de Inicio:</label>
+        <input type="date" name="start_date" id="start_date" required>
+        
+        <label for="end_date">Fecha de Fin:</label>
+        <input type="date" name="end_date" id="end_date" required>
+        
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        
+        <!-- Botón para limpiar los filtros -->
+        <a href="{% url 'attendance_prof' %}" class="btn-secondary">Limpiar Filtros</a>
+    </form>
+    <a class="btn btn-success" href="{% url 'register_entry_or_exit' %}">
+        <img src="{% static 'images/profesor1.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+        Registrar Entrada/Salida
+    </a>
+
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Profesor</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attendance in attendances %}
+            <tr>
+                <td>{{ attendance.teacher }}</td>
+                <td>{{ attendance.entry_time }}</td>
+                <td>{{ attendance.exit_time }}</td>
+                <td>{{ attendance.created_at }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">No se han registrado entradas o salidas en este rango de fechas.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<a class="btn-secondary" href="{% url 'profile' %}">Volver Atrás</a>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+<style>
+    .materia-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .materia-list li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .materia-name {
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #333;
+    }
+    .materia-description {
+        display: block;
+        font-style: italic;
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+<div>
+    
+    <h5>Cursos asignados</h5>
+    
+    {% if assigned_materias %}
+    <ul class='list-group'>
+        {% for materia in assigned_materias %}
+            {% with enrollment_count=course.registration_set.count %}
+                <li class='list-group-item list-group-item-success'>
+                    <span class="materia-name">{{ materia.name }}</span>
+                    <span class="materia-description">Esta materia es del curso: {{ materia.description }}</span>
+                    <a href="{% url 'student_2_list' materia.id %}"
+                    class='btn btn-sm btn-success float-end'>
+                        Listar alumnos
+                        <span class='badge rounded-pill bg-light text-danger'>{{ enrollment_count }}</span>
+                    </a>
+                      
+                    {% if allow_add_notes %}
+                        <a href="{% url 'student_list_mark' materia.id %}" class='btn btn-sm btn-warning float-end'>
+                            Agregar Nota
+                            <span class='badge rounded-pill bg-light text-danger'>{{ enrollment_count }}</span>
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Agregar Nota (Desactivado)</span>
+                    {% endif %}    
+
+                </li>
+            {% endwith %}
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class='alert alert-primary' role='alert'>
+        Usted no tiene cursos asignados hasta ahora.
+    </div>
+    {% endif %}
+</div>

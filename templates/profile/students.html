@@ -1,0 +1,164 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materias Inscritos</title>
+
+    <!-- Incluir las bibliotecas de Bootstrap más recientes -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .average-cell {
+            background-color: #d3d3d3 !important; /* Color gris claro */
+            color: #000; /* Color del texto */
+        }
+
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 768px) {
+            .modal-dialog {
+                max-width: 90%;
+                margin: 1.75rem auto;
+            }
+            .modal-content {
+                padding: 1rem;
+            }
+            .list-group-item {
+                font-size: 14px;
+            }
+            .btn-outline-secondary {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h5>Materias donde está inscrito</h5>
+        <a href="{% url 'schedule_detail' %}" class="btn btn-primary">Ver Horario del Curso</a>
+
+        {% if enrolled_materias %}
+        <ul class="list-group">
+            {% for materia in enrolled_materias %}
+                <li class="list-group-item">
+                    <span class="materia-name">{{ materia.name }}</span>
+                    <span class="materia-description">Del curso: {{ materia.description }}</span>
+                    <button type="button" class="btn btn-outline-secondary float-end" data-bs-toggle="modal" 
+                    onclick="showEvolutionModal(this, '{{ forloop.counter }}')"
+                    data-bs-target="#modalEvolution-{{ forloop.counter }}" data-materia-id="{{ materia.id }}" data-student-id="{{ student_id }}">
+                        Consultar evolución
+                    </button>
+                </li>
+
+                <!-- Modal -->
+                <div class="modal fade" id="modalEvolution-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modalEvolutionLabel-{{ forloop.counter }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalEvolutionLabel-{{ forloop.counter }}">Notas de {{ materia.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="modal-body-{{ forloop.counter }}">
+                                <!-- Aquí se insertarán dinámicamente los datos -->
+                            </div>
+                            <div class="modal-footer">
+                                <a class="btn btn-sm btn-danger" href="" id="generate-pdf-button-{{ forloop.counter }}">
+                                    <img src="{% static 'images/pdf.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+                                    Generar PDF
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="alert alert-primary" role="alert">
+            Ud no tiene cursos asignados hasta ahora.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Incluir las bibliotecas de Bootstrap más recientes -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+
+    <script>
+        async function showEvolutionModal(button, counter) {
+            try {
+                var materiaId = button.getAttribute('data-materia-id');
+                var studentId = button.getAttribute('data-student-id');
+                var response = await fetch(`/evolution/${materiaId}/${studentId}`);
+                var data = await response.json();
+
+                if (data.marks && data.marks.length > 0) {
+                    var marks = data.marks[0]; // Supongo que solo hay un conjunto de notas por materia
+                   
+                    var cardContent = `
+                    <h5 class="card-title"><strong>${data.materiaName}</strong>
+                        <span class="float-end badge bg-primary">Regular</span>
+                    </h5>
+                    <h6>Profesor: ${data.teacher}</h6>
+                    <hr>
+                    <h6 class="card-subtitle my-2 text-muted">Notas:</h6>
+                    <table class="table table-success table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="row">Descripción</th>
+                                <th class="text-center" scope="col">Nota</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Primer Trimestre</th>
+                                <td class="text-center">${marks.mark_1}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Segundo Trimestre</th>
+                                <td class="text-center">${marks.mark_2}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Tercer Trimestre</th>
+                                <td class="text-center">${marks.mark_3}</td>
+                            </tr>
+                            <tr class="thead-dark">
+                                <th scope="row">Promedio Final Anual</th>
+                                <td class="table-secondary text-center">${marks.average}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    `;
+                    var modalBody = document.getElementById(`modal-body-${counter}`);
+                    modalBody.innerHTML = cardContent;
+
+                    // Actualizamos la URL del botón "Generar PDF" para este modal
+                    var generatePDFButton = document.getElementById(`generate-pdf-button-${counter}`);
+                    generatePDFButton.href = `/evolution/${materiaId}/${studentId}/?generate_pdf=true`;
+
+                    var modalElement = document.getElementById(`modalEvolution-${counter}`);
+                    var modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+
+                    // Agregar un evento para eliminar la superposición solo cuando el modal esté completamente cerrado
+                    modalElement.addEventListener('hidden.bs.modal', function () {
+                        let backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    });
+                } else {
+                    console.log('No se encontraron notas para esta materia.');
+                }
+            } catch (error) {
+                console.log('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
