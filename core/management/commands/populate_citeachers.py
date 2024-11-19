@@ -4,7 +4,7 @@ from core.models import CITeacher
 from accounts.models import Profile  # Asegúrate de importar el modelo Profile correctamente
 
 class Command(BaseCommand):
-    help = 'Pobla la tabla CITeacher con los datos de los profesores'
+    help = 'Poblar la tabla CITeacher con los datos de los profesores'
 
     def handle(self, *args, **kwargs):
         # Obtener los usuarios que pertenecen al grupo "profesores"

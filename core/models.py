@@ -60,9 +60,9 @@ class Mark(models.Model):
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, verbose_name='Materia')
     student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante')
     # Notas ahora solo trimestral
-    mark_1 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Nota 1')
-    mark_2 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Nota 2')
-    mark_3 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Nota 3')
+    mark_1 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Primer trimestre')
+    mark_2 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Segundo trimestre')
+    mark_3 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Tercer trimestre')
     average = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, verbose_name='Promedio')
     #para poder poner un mensaje
    # teacher_message = models.TextField(null=True, blank=True)  # Campo para el mensaje del profesor

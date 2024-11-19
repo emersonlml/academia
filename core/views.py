@@ -40,8 +40,6 @@ from django.templatetags.static import static
 from .models import Schedule
 from django.http import HttpResponseRedirect
 
-
-
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
 def plural_to_singular(plural):
     # Diccionario de palabras

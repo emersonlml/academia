@@ -52,7 +52,14 @@
                 <p>Cursos Asignados</p>
             </a>
         </div>
-  
+        {% elif user.is_authenticated and group_name == 'administrativos' %}
+        <!-- Mostrar botón de cursos asignados para profesores -->
+        <div class="col-md-6 container-centered">
+            <a class="boton-curso" href="{% url 'profile' %}">
+                <img src="{% static 'images/cursos.png' %}" alt="Cursos">
+                <p>Ver sistema</p>
+            </a>
+        </div>
         <!-- Si el usuario no está autenticado mostramos el carrusel -->
         {% else %}
         <!-- Columna derecha: Carrusel -->
