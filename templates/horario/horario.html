@@ -12,13 +12,34 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 10px; /* Reduce el tamaño de fuente */
         }
         th, td {
             border: 1px solid #000;
             text-align: center;
-            padding: 10px;
-            min-height: 50px;
-            position: relative;
+            padding: 5px; /* Reduce el espacio interno */
+            min-height: 30px; /* Reduce la altura mínima */
+        }
+        .materia {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 5px; /* Reduce el tamaño de las materias */
+            margin: 3px;
+            font-size: 10px; /* Ajusta el tamaño de fuente */
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .number {
+            opacity: 0.1; 
+            position: absolute; 
+            top: 3px; 
+            left: 3px; 
+            font-size: 12px; 
+            z-index: 1;
+        }
+        #schedule-container {
+            width: 100%;
+            overflow: hidden;
         }
         .dropzone {
             min-height: 50px;
@@ -216,18 +237,19 @@
         const horarioContainer = document.getElementById('schedule-container');
         const courseSelect = document.getElementById('course-select');
         const courseName = courseSelect.options[courseSelect.selectedIndex].text || "Horario";
-
+    
         html2pdf()
             .set({
-                margin: 1,
+                margin: 0.2, // Márgenes pequeños para aprovechar más espacio
                 filename: `${courseName}.pdf`,  // Usa el nombre del curso seleccionado
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                html2canvas: { scale: 3, useCORS: true, scrollY: 0 }, // Aumenta la calidad y evita cortes
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } // Usa tamaño A4 apaisado
             })
             .from(horarioContainer)
             .save();
     });
+    
 </script>
 
 </body>

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import Materia,Registration,Attendance,Mark,Course
 from .forms import MateriaForm
+from .models import StudentHistory, StudentDocument
+
 
 # Register your models here.
 
@@ -56,3 +58,16 @@ class MarkAdmin(admin.ModelAdmin):
     list_filter = ('materia', 'student')
 
 admin.site.register(Mark, MarkAdmin)
+#student hystory
+class StudentDocumentInline(admin.TabularInline):
+    model = StudentDocument
+    extra = 1
+
+@admin.register(StudentHistory)
+class StudentHistoryAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'enrollment_date', 'completion_date', 'is_approved', 'final_average', 'comment')
+    list_filter = ('course', 'is_approved')
+    search_fields = ('student__username', 'course__name')
+    readonly_fields = ('student', 'course', 'enrollment_date', 'completion_date', 'is_approved', 'final_average')
+    fields = ('student', 'course', 'enrollment_date', 'completion_date', 'is_approved', 'final_average', 'comment', 'detailed_grades')
+    inlines = [StudentDocumentInline]

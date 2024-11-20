@@ -1453,4 +1453,72 @@ def download_course_csv(request, course_id):
     return response
     return response
 
-#quito a sexto
+#student history
+from .models import StudentHistory, User
+
+def student_detail(request, student_id):
+    student = get_object_or_404(User, id=student_id)
+    history = StudentHistory.objects.filter(student=student).order_by('-completion_date')
+    
+    return render(request, 'student_detail.html', {
+        'student': student,
+        'history': history,
+    })
+#siguente curso
+def promote_students_view(request):
+    # Diccionario que define las relaciones de promoción entre cursos
+    promotion_paths = {
+        1: 4,   # Primero-A -> Segundo-A
+        2: 5,   # Primero-B -> Segundo-B
+        3: 7,   # Primero-C -> Segundo-C
+        
+        4: 8,   # Segundo-A -> Tercero-A
+        5: 9,   # Segundo-B -> Tercero-B
+        7: 10,  # Segundo-C -> Tercero-C
+        
+        8: 12,  # Tercero-A -> Cuarto-A
+        9: 13,  # Tercero-B -> Cuarto-B
+        10: 14, # Tercero-C -> Cuarto-C
+        11: 15, # Tercero-D -> Cuarto-D
+        
+        12: 16, # Cuarto-A -> Quinto-A
+        13: 17, # Cuarto-B -> Quinto-B
+        14: 18, # Cuarto-C -> Quinto-C
+        15: 19, # Cuarto-D -> Quinto-D
+        
+        16: 20, # Quinto-A -> Sexto-A
+        17: 21, # Quinto-B -> Sexto-B
+        18: 22, # Quinto-C -> Sexto-C
+        19: 23, # Quinto-D -> Sexto-D
+    }
+
+    # Procesar cada curso en promotion_paths
+    for current_course_id, next_course_id in promotion_paths.items():
+        current_course = Course.objects.get(id=current_course_id)
+        next_course = Course.objects.get(id=next_course_id)
+        
+        # Filtrar inscripciones activas en el curso actual
+        registrations = Registration.objects.filter(course=current_course, enabled=True)
+        
+        for registration in registrations:
+            student = registration.student
+
+            # Comprobar si el estudiante tiene un promedio >= 51 en todas las materias del curso actual
+            materias = current_course.materias.all()
+            all_materias_approved = True
+
+            for materia in materias:
+                # Obtener la nota de la materia específica para el estudiante
+                mark = Mark.objects.filter(student=student, materia=materia).first()
+                
+                # Verificamos si la nota existe y si el promedio es mayor o igual a 51
+                if mark is None or mark.average is None or mark.average < 51:
+                    all_materias_approved = False
+                    break
+
+            # Si el estudiante aprobó todas las materias, promoverlo
+            if all_materias_approved:
+                registration.course = next_course
+                registration.save()
+
+    return render(request, 'promote_students.html', {'message': "Promoción completada."})

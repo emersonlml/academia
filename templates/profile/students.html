@@ -42,7 +42,51 @@
     <div class="container mt-4">
         <h5>Materias donde está inscrito</h5>
         <a href="{% url 'schedule_detail' %}" class="btn btn-primary">Ver Horario del Curso</a>
+        <!--history
+                <h2>Historial Académico de {{ student.first_name }} {{ student.last_name }}</h2>
 
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Curso</th>
+                    <th>Fecha de Inscripción</th>
+                    <th>Fecha de Finalización</th>
+                    <th>Aprobado</th>
+                    <th>Promedio Final</th>
+                    <th>Comentario</th>
+                    <th>Notas Detalladas</th>
+                    <th>Documentos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history %}
+                <tr>
+                    <td>{{ record.course.name }}</td>
+                    <td>{{ record.enrollment_date }}</td>
+                    <td>{{ record.completion_date }}</td>
+                    <td>{{ record.is_approved|yesno:"Sí,No" }}</td>
+                    <td>{{ record.final_average }}</td>
+                    <td>{{ record.comment }}</td>
+                    <td>
+                        <pre>{{ record.detailed_grades|json_script:"detailedGrades" }}</pre>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for document in record.documents.all %}
+                                <li><a href="{{ document.file.url }}" target="_blank">{{ document.description }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No hay historial disponible para este estudiante.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        end-->
         {% if enrolled_materias %}
         <ul class="list-group">
             {% for materia in enrolled_materias %}

@@ -101,5 +101,7 @@ urlpatterns = [
   #descargar csv dede un curso
   path('generate_course_preview/<int:course_id>/', views.generate_course_preview, name='generate_course_preview'),
   path('download_course_csv/<int:course_id>/', views.download_course_csv, name='download_course_csv'),
+  #sigiente curso
+  path('promote-students/', views.promote_students_view, name='promote_students'),
 
 ]

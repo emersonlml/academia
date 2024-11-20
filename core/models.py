@@ -151,3 +151,31 @@ class Schedule(models.Model):
 
     def __str__(self):
         return self.name
+#student hystori
+class StudentHistory(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Curso')
+    enrollment_date = models.DateField()
+    completion_date = models.DateField()
+    is_approved = models.BooleanField()
+    final_average = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, verbose_name='Promedio Final')
+    comment = models.TextField(null=True, blank=True, verbose_name='Comentario')
+    
+    # Nuevo campo para almacenar notas detalladas (en formato JSON o texto estructurado)
+    detailed_grades = models.JSONField(null=True, blank=True, verbose_name='Notas Detalladas')  # Si usas PostgreSQL
+
+    def __str__(self):
+        return f"Historial de {self.student.username} en {self.course.name}"
+
+    class Meta:
+        verbose_name = 'Historial de Estudiante'
+        verbose_name_plural = 'Historial de Estudiantes'
+class StudentDocument(models.Model):
+    history = models.ForeignKey(StudentHistory, on_delete=models.CASCADE, related_name='documents', verbose_name='Historial')
+    file = models.FileField(upload_to='student_documents/', verbose_name='Documento')
+    description = models.CharField(max_length=255, null=True, blank=True, verbose_name='Descripción')
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Subida')
+
+    def __str__(self):
+        return f"Documento de {self.history.student.username} ({self.description})"
+#model para sigiente course
