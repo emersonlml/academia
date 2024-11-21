@@ -23,6 +23,12 @@
                             <input type="hidden" name="delete_file_id" value="{{ schedule.id }}">
                             <button type="submit" class="btn btn-danger">Eliminar</button>
                         </form>
+                        <td>
+                            <!-- Previsualizar el archivo -->
+                            <a href="{{ schedule.file.url }}" target="_blank" class="btn btn-info btn-sm">Abrir PDF</a>
+                            <!-- Descargar el archivo -->
+                            <a href="{{ schedule.file.url }}" download="{{ schedule.name }}" class="btn btn-success btn-sm">Descargar</a>
+                        </td>
                     </td>
                 </tr>
             {% endfor %}
@@ -32,4 +38,11 @@
     <a class="btn btn-primary btn-sm" href="{% url 'profile' %}">Volver Atrás</a>
 
 </div>
+<script>
+    function previewPDF(url) {
+        const newWindow = window.open();
+        newWindow.document.write(`<iframe src="${url}" style="width:100%;height:100%;" frameborder="0"></iframe>`);
+    }
+    </script>
+    
 {% endblock %}
