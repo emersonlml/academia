@@ -39,6 +39,13 @@ from datetime import datetime
 from django.templatetags.static import static
 from .models import Schedule
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
+from django.core.files.base import ContentFile
+from weasyprint import HTML
+from io import BytesIO
+import base64
+from .models import StudentHistory, User
+
 
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
 def plural_to_singular(plural):
@@ -1248,7 +1255,6 @@ def upload_schedule(request):
                 schedule = Schedule(file=file)
                 schedule.name = file.name  # Guardar el nombre del archivo PDF
                 schedule.save()
-            
             messages.success(request, f"{len(files)} archivos subidos exitosamente.")
             return redirect('schedule_list')
         else:
@@ -1268,6 +1274,9 @@ class ScheduleListView(UserPassesTestMixin, ListView):
         return user.is_superuser or user.groups.filter(name='secretarias').exists()
     def handle_no_permission(self):
         return redirect('error')
+    def get_queryset(self):
+        return Schedule.objects.all()
+
 
     def post(self, request, *args, **kwargs):
         # Verificar si se quiere eliminar un archivo
@@ -1284,6 +1293,46 @@ class ScheduleListView(UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         return context
 
+#automatiza el horario view
+def generate_pdf_from_html(html_content):
+    # Convierte el HTML a un archivo PDF
+    pdf_file = BytesIO()
+    HTML(string=html_content).write_pdf(pdf_file)
+    return pdf_file.getvalue()  # Devuelve el contenido binario del PDF
+
+@csrf_exempt
+def generate_and_save_schedule_pdf(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            course_id = data.get("course_id")
+            pdf_base64 = data.get("pdf_data")  # Recibe el PDF en formato base64
+
+            if not course_id or not pdf_base64:
+                return JsonResponse({"error": "Datos incompletos"}, status=400)
+
+            # Decodifica el contenido base64 del PDF
+            pdf_content = base64.b64decode(pdf_base64)
+
+            # Obtener el nombre del curso
+            course = get_object_or_404(Course, id=course_id)
+            course_name = course.name.replace(" ", "_")
+
+            # Guardar el archivo PDF en el modelo Schedule
+            file_name = f"{course_name}.pdf"
+            schedule = Schedule(
+                name=file_name,
+                file=ContentFile(pdf_content, name=file_name),
+            )
+            schedule.save()
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    else:
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    
 #ver horario estudent
 @add_group_name_to_context 
 class ScheduleDetailView(View):
@@ -1454,8 +1503,6 @@ def download_course_csv(request, course_id):
     return response
 
 #student history
-from .models import StudentHistory, User
-
 def student_detail(request, student_id):
     student = get_object_or_404(User, id=student_id)
     history = StudentHistory.objects.filter(student=student).order_by('-completion_date')

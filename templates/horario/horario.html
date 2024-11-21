@@ -248,9 +248,76 @@
             })
             .from(horarioContainer)
             .save();
+    });   
+</script>
+<!-- Botón para automatizar la generación y subida del PDF -->
+<button class="btn btn-success" id="auto-upload-pdf">Generar y Subir PDF</button>
+
+<script>
+    document.getElementById('auto-upload-pdf').addEventListener('click', function () {
+        const courseSelect = document.getElementById('course-select');
+        const courseId = courseSelect.value;
+
+        if (!courseId) {
+            alert('Por favor, selecciona un curso antes de generar el PDF.');
+            return;
+        }
+
+        // Captura el contenedor del horario
+        const horarioContainer = document.getElementById('schedule-container');
+
+        // Generar el PDF tal como se ve en pantalla
+        const courseName = courseSelect.options[courseSelect.selectedIndex].text || "Horario";
+
+        html2pdf()
+            .set({
+                margin: 0.2, // Márgenes pequeños
+                filename: `${courseName}.pdf`, // Usa el nombre del curso
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 3, // Aumenta la calidad
+                    useCORS: true,
+                    scrollY: 0, // Evita cortes en la imagen
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'landscape', // Apaisado
+                },
+            })
+            .from(horarioContainer) // Usa directamente el contenedor del horario
+            .outputPdf('datauristring') // Genera el PDF en forma de URI
+            .then(function (pdfUri) {
+                // Subir el PDF generado al servidor
+                fetch('/generate-and-save-schedule-pdf/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}', // Asegúrate de que el token esté presente
+                    },
+                    body: JSON.stringify({
+                        course_id: courseId,
+                        pdf_data: pdfUri.split(',')[1], // Enviar solo el contenido base64
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(`Error: ${data.error}`);
+                        } else {
+                            alert('PDF generado y subido exitosamente.');
+                            window.location.href = '/schedules/'; // Redirige a la lista de horarios
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al generar y subir el PDF:', error);
+                        alert('Ocurrió un error al generar y subir el PDF.');
+                    });
+            });
     });
     
 </script>
+
 
 </body>
 

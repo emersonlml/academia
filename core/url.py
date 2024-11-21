@@ -13,6 +13,8 @@ from django.contrib.auth import views as auth_views
 from .views import  DeleteUserView,HorarioView,RegisterEntryOrExitView,GetMateriasByCourseView,ScheduleDetailView
 from .views import MateriaEditView
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -104,4 +106,6 @@ urlpatterns = [
   #sigiente curso
   path('promote-students/', views.promote_students_view, name='promote_students'),
 
-]
+  path('generate-and-save-schedule-pdf/', views.generate_and_save_schedule_pdf, name='generate_and_save_schedule_pdf'),
+
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
