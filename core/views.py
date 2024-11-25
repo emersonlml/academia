@@ -375,7 +375,25 @@ class StudentListMarkView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
         context['materia'] = materia
         context['student_data'] = list(student_data.values())  # Convertir el diccionario a lista
         return context
+    def dispatch(self, request, *args, **kwargs):
+        config = GlobalConfig.get_solo_config()
+        print(f"allow_add_notes: {config.allow_add_notes}")  # Log para verificar el estado
+        if not config.allow_add_notes:
+            print("Redirigiendo a la vista de error")  # Verificar si entra en esta lógica
+            messages.error(request, 'No está permitido agregar notas en este momento.')
+            return redirect(reverse('SinPermiso'))  # Asegúrate de que el nombre de la URL sea correcto
+        return super().dispatch(request, *args, **kwargs)
 
+#sin permiso profesores
+@add_group_name_to_context
+class SinPermisoView(TemplateView):
+    template_name = 'error2.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        error_image_path = os.path.join(settings.MEDIA_URL, 'error.png')
+        context['error_image_path'] = error_image_path
+        return context
     #actualizar notas de alumnos
 @add_group_name_to_context
 class UpdateMarkView(UpdateView):
@@ -404,7 +422,6 @@ class UpdateMarkView(UpdateView):
     def get_object(self, queryset=None):
         mark_id = self.kwargs['mark_id']
         return get_object_or_404(Mark, id=mark_id)
-
 #atedendace view per sin la parte de la asistencia
 @add_group_name_to_context
 class ListEstudent(TemplateView):

@@ -100,7 +100,10 @@ class GlobalConfig(models.Model):
 
     def __str__(self):
         return "Configuración Global"
-
+    @staticmethod
+    def get_solo_config():
+        config, created = GlobalConfig.objects.get_or_create(id=1)
+        return config
 #controla notas estudent
 
 

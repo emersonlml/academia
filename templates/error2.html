@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>Para añadir las notas de los alumnos no estan activadas espere autorizacion de la Directora</h2>
+    <p>No tienes permiso para realizar esta acción en este momento.</p>
+    <h4>Por favor, contacta a la Directora si crees que esto es un error</h4>
+    <img src="{{ error_image_path }}" alt="Error Image" style="max-width: 30%; height: auto;">
+    
+</div>
+<center>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">Volver al inicio</a>
+</center>
+{% endblock %}

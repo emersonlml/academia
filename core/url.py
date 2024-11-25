@@ -11,7 +11,7 @@ from .views import attendance_prof,CourseDetailView
 from .views import AddUsersFromCSVView
 from django.contrib.auth import views as auth_views
 from .views import  DeleteUserView,HorarioView,RegisterEntryOrExitView,GetMateriasByCourseView,ScheduleDetailView
-from .views import MateriaEditView,ToggleViewEvolutionView
+from .views import MateriaEditView,ToggleViewEvolutionView,SinPermisoView
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -110,6 +110,7 @@ urlpatterns = [
   path('generate-and-save-schedule-pdf/', views.generate_and_save_schedule_pdf, name='generate_and_save_schedule_pdf'),
   #ver notas estudent
   path('toggle-view-evolution/', ToggleViewEvolutionView.as_view(), name='toggle_view_evolution'),
+  path('sin_permiso/',login_required(SinPermisoView.as_view()), name='SinPermiso'),
 
 
 ]
