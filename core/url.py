@@ -49,6 +49,7 @@ urlpatterns = [
     path('evolution/<int:materia_id>/<int:student_id>/',login_required(evolution), name='evolution'),
     #vista de on/off boton
     path('toggle-add-notes/',login_required( ToggleAddNotesView.as_view()), name='toggle_add_notes'),
+
     #PARA PODER BUSCAR PROFESORES
     path('admin-profesores/',login_required( AdminProfesoresView.as_view()), name='admin_profesores'),
     path('search-profesores/', search_profesores, name='search_profesores'),

@@ -182,7 +182,6 @@ class ProfileView(TemplateView):
 
         elif user.groups.filter(name='administrativos').exists():
             context['group_name'] = 'administrativos'
-
             # Filtrar usuarios según la búsqueda
             all_users = User.objects.all()
             if search_query:
@@ -1332,7 +1331,10 @@ def generate_and_save_schedule_pdf(request):
     else:
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
-    
+ 
+#acivar notas estudnet
+
+
 #ver horario estudent
 @add_group_name_to_context 
 class ScheduleDetailView(View):

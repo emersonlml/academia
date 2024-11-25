@@ -95,10 +95,10 @@ class Mark(models.Model):
     
 class GlobalConfig(models.Model):
     allow_add_notes = models.BooleanField(default=True)
-
     def __str__(self):
         return "Configuración Global"
-        
+
+
 #model para asistencia de profesores tabla primero
 class CITeacher(models.Model):
     id = models.AutoField(primary_key=True)  # ID autoincremental
@@ -178,4 +178,4 @@ class StudentDocument(models.Model):
 
     def __str__(self):
         return f"Documento de {self.history.student.username} ({self.description})"
-#model para sigiente course
+#model para sigiente ACTIVAR VER NOTAS ESTUDNET
