@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from .forms import RegisterForm
 from django.views import View
 from .forms import RegisterForm,UserForm,ProfileForm,CourseForm,UserCreationForm,EditMateriaForm
-from .models import Course,Registration,Materia,Mark,GlobalConfig
+from .models import Course,Registration,Materia,Mark,GlobalConfig  
 from django.urls import reverse_lazy,reverse
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin,LoginRequiredMixin
@@ -528,6 +528,7 @@ def update_add_notes_status(request):
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
 
+
 #mostarar lista de alumnos y notas a los profesores sin accion de poner nota
 @add_group_name_to_context
 class StudentListMarkViewsacction(TemplateView, LoginRequiredMixin, UserPassesTestMixin):
@@ -714,7 +715,7 @@ class AddUserView(UserPassesTestMixin, LoginRequiredMixin, CreateView):
         course_id = self.request.POST.get('course')  # Obtener el curso seleccionado
         group = Group.objects.get(id=group_id)
         user = form.save(commit=False)
-        user.set_password('contraseña')  # Cambia 'contraseña' por un valor seguro
+        user.set_password('contraseña')  
         if group_id != '1':
             user.is_staff = True
         user.save()
@@ -1333,6 +1334,17 @@ def generate_and_save_schedule_pdf(request):
 
  
 #acivar notas estudnet
+class ToggleViewEvolutionView(View):
+    def post(self, request, *args, **kwargs):
+        if request.user.groups.filter(name='administrativos').exists():  # Verifica que sea administrativo
+            is_active = request.POST.get('is_active') == 'true'
+            config, created = GlobalConfig.objects.get_or_create(id=1)
+            config.allow_view_evolution = is_active  # Actualiza el nuevo campo
+            config.save()
+            messages.success(request, 'La configuración para Consultar Evolución ha sido actualizada.')
+        else:
+            messages.error(request, 'No tienes permiso para realizar esta acción.')
+        return redirect(reverse('profile'))
 
 
 #ver horario estudent

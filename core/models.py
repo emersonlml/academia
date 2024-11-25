@@ -93,10 +93,15 @@ class Mark(models.Model):
         # Aquí puedes ajustar el valor de aprobación según tu criterio, por ejemplo, si el promedio es 60 o más
         return self.average is not None and self.average >= 51
     
+#controla notas prof
 class GlobalConfig(models.Model):
     allow_add_notes = models.BooleanField(default=True)
+    allow_view_evolution = models.BooleanField(default=True)  # Nuevo campo
+
     def __str__(self):
         return "Configuración Global"
+
+#controla notas estudent
 
 
 #model para asistencia de profesores tabla primero

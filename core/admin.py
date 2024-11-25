@@ -3,7 +3,6 @@ from .models import Materia,Registration,Attendance,Mark,Course
 from .forms import MateriaForm
 from .models import StudentHistory, StudentDocument
 
-
 # Register your models here.
 
 #curso renombrado a materia
@@ -71,3 +70,4 @@ class StudentHistoryAdmin(admin.ModelAdmin):
     readonly_fields = ('student', 'course', 'enrollment_date', 'completion_date', 'is_approved', 'final_average')
     fields = ('student', 'course', 'enrollment_date', 'completion_date', 'is_approved', 'final_average', 'comment', 'detailed_grades')
     inlines = [StudentDocumentInline]
+    

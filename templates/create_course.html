@@ -20,12 +20,25 @@
             <div class="card mx-auto my-5" style="width: 40rem;">
                 <div class="card-body">
                     <h5 class="card-title">Complete todos los campos</h5>
+                    
+                    <!-- Formulario principal de curso -->
                     {{ form | crispy }}
+        
+                    <!-- Formulario inline para materias -->
+                    <h5 class="mt-4">Materias</h5>
+                    {{ materia_formset.management_form }}
+                    {% for form in materia_formset %}
+                        <div class="border p-3 mb-3">
+                            {{ form | crispy }}
+                        </div>
+                    {% endfor %}
+                    
                     <a class="card-link" href="{% url 'home' %}">Inicio</a>
                     <a class="card-link" href="{% url 'courses' %}">Cursos</a>
                     <button class="btn btn-primary float-end" type="submit">Guardar</button>
                 </div>
             </div>
         </form>
+        
     </div>
 {% endblock %}

@@ -11,7 +11,7 @@
       <div class="d-flex align-items-center">
         <h6 class="mb-0 me-3">
           <img src="{% static 'images/nota.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
-          Activar notas
+          Activar notas  del Profesor
         </h6>
         <form id="toggleForm" method="post" action="{% url 'toggle_add_notes' %}">
           {% csrf_token %}
@@ -23,6 +23,26 @@
         </form>
       </div>
     </li>
+   
+    <!--estudent-->
+    <li class="nav-item">
+      <div class="d-flex align-items-center">
+        <h6 class="mb-0 me-3">
+          <img src="{% static 'images/nota.png' %}" alt="Evolution Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+          Activar Notas  de los Estudiante
+        </h6>
+        <form id="toggleEvolutionForm" method="post" action="{% url 'toggle_view_evolution' %}">
+          {% csrf_token %}
+          <input type="hidden" name="is_active" id="toggleEvolutionInput" value="{{ allow_view_evolution|yesno:'true,false' }}">
+          <div class="toggleContainer">
+            <input type="checkbox" id="evolutionSwitch" class="toggle" {% if allow_view_evolution %}checked{% endif %}>
+            <label for="evolutionSwitch" class="switch"></label>
+          </div>
+        </form>
+      </div>
+    </li>
+    
+ <br>
     <!-- Otros elementos del perfil -->
     <li class="nav-item">
       <a class="nav-link active" href="#usuarios" data-bs-toggle="tab">
@@ -141,10 +161,18 @@
   </style>
 
   <script>
-    document.getElementById('switch').addEventListener('change', function() {
+   
+      document.getElementById('switch').addEventListener('change', function() {
+        var isActive = this.checked;
+        document.getElementById('toggleInput').value = isActive ? 'true' : 'false';
+        document.getElementById('toggleForm').submit();
+      });
+  
+    document.getElementById('evolutionSwitch').addEventListener('change', function() {
       var isActive = this.checked;
-      document.getElementById('toggleInput').value = isActive ? 'true' : 'false';
-      document.getElementById('toggleForm').submit();
+      document.getElementById('toggleEvolutionInput').value = isActive ? 'true' : 'false';
+      document.getElementById('toggleEvolutionForm').submit();
     });
   </script>
+
 </div>

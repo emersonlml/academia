@@ -52,6 +52,7 @@ class CourseForm(forms.ModelForm):
             'description': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '20'}),  # Estilo para 'description'
 
         }
+        
 # FORMULARIO DE NUEVO USUARIO
 class UserCreationForm(forms.ModelForm):
     class Meta:

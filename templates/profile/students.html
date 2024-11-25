@@ -37,6 +37,13 @@
             }
         }
     </style>
+    <style>
+        .btn-evolution, .btn-outline-info {
+            font-size: 0.8rem; 
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+    
 </head>
 <body>
     <div class="container mt-4">
@@ -93,21 +100,25 @@
                     <span class="materia-name">{{ materia.name }}</span>
                     <span class="materia-description">Del curso: {{ materia.description }}</span>
                    
-           
-                    <button type="button" class="btn btn-outline-secondary btn-evolution me-2" data-bs-toggle="modal" 
-                            onclick="showEvolutionModal(this, '{{ forloop.counter }}')"
-                            data-bs-target="#modalEvolution-{{ forloop.counter }}" data-materia-id="{{ materia.id }}" data-student-id="{{ student_id }}">
-                            Consultar evolución
-                    </button>
-    
+                            <!-- Botón Consultar Evolución -->
+                            {% if allow_view_evolution %}
+                                <button type="button" class="btn btn-outline-secondary btn-sm btn-evolution me-2" data-bs-toggle="modal" 
+                                        onclick="showEvolutionModal(this, '{{ forloop.counter }}')"
+                                        data-bs-target="#modalEvolution-{{ forloop.counter }}" data-materia-id="{{ materia.id }}" data-student-id="{{ student_id }}">
+                                    Consultar evolución
+                                </button>
+                                {% else %}
+                               <!-- <span class="text-muted">Consultar evolución (Desactivado)</span>-->
+                                {% endif %}
 
+                        
+                        <!-- Botón Mostrar Información -->
+                        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                        onclick="showInfoModal(this, '{{ forloop.counter }}')"
+                        data-bs-target="#modalEvolution-{{ forloop.counter }}" data-materia-id="{{ materia.id }}" data-student-id="{{ student_id }}">
+                        Mostrar información
+                        </button>
 
-                <!-- Nuevo Botón Mostrar Información -->
-                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
-                    onclick="showInfoModal(this, '{{ forloop.counter }}')"
-                    data-bs-target="#modalEvolution-{{ forloop.counter }}" data-materia-id="{{ materia.id }}" data-student-id="{{ student_id }}">
-                    Mostrar información
-                </button>
 
 
                 </li>

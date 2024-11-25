@@ -45,7 +45,9 @@
                                 <select name="group" id="group" class="form-control" required>
                                     <option value="" disabled selected>Seleccione un grupo</option>
                                     {% for group, singular_group in groups %}
-                                    <option value="{{ group.id }}">{{ singular_group }}</option>
+                                        {% if singular_group != "Administrativo" %}
+                                        <option value="{{ group.id }}">{{ singular_group }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
