@@ -63,7 +63,7 @@ class Mark(models.Model):
     mark_1 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Primer trimestre')
     mark_2 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Segundo trimestre')
     mark_3 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Tercer trimestre')
-    average = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, verbose_name='Promedio')
+    average = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='Promedio')
     #para poder poner un mensaje
    # teacher_message = models.TextField(null=True, blank=True)  # Campo para el mensaje del profesor
 

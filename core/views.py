@@ -528,7 +528,6 @@ def update_add_notes_status(request):
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
 
-
 #mostarar lista de alumnos y notas a los profesores sin accion de poner nota
 @add_group_name_to_context
 class StudentListMarkViewsacction(TemplateView, LoginRequiredMixin, UserPassesTestMixin):
