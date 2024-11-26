@@ -379,7 +379,7 @@ class StudentListMarkView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
         config = GlobalConfig.get_solo_config()
         print(f"allow_add_notes: {config.allow_add_notes}")  # Log para verificar el estado
         if not config.allow_add_notes:
-            print("Redirigiendo a la vista de error")  # Verificar si entra en esta lógica
+            #print("Redirigiendo a la vista de error") Verificar si entra en esta lógica
             messages.error(request, 'No está permitido agregar notas en este momento.')
             return redirect(reverse('SinPermiso'))  # Asegúrate de que el nombre de la URL sea correcto
         return super().dispatch(request, *args, **kwargs)
@@ -1348,7 +1348,6 @@ def generate_and_save_schedule_pdf(request):
     else:
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
- 
 #acivar notas estudnet
 class ToggleViewEvolutionView(View):
     def post(self, request, *args, **kwargs):
@@ -1361,7 +1360,6 @@ class ToggleViewEvolutionView(View):
         else:
             messages.error(request, 'No tienes permiso para realizar esta acción.')
         return redirect(reverse('profile'))
-
 
 #ver horario estudent
 @add_group_name_to_context 
@@ -1452,8 +1450,7 @@ class MateriaEditView(View):
 
         return render(request, self.template_name, context)
     
-
-#boton de fin de año
+#template de fin de año
 @add_group_name_to_context
 class FinAnoView(TemplateView):
     template_name = 'fin_ano.html'
@@ -1493,7 +1490,6 @@ def generate_course_preview(request, course_id):
         'eligible_students': eligible_students,
         'ineligible_students': ineligible_students
     })
-
 
 def download_course_csv(request, course_id):
     course = get_object_or_404(Course, id=course_id)
@@ -1545,13 +1541,13 @@ def student_detail(request, student_id):
 def promote_students_view(request):
     # Diccionario que define las relaciones de promoción entre cursos
     promotion_paths = {
-        1: 4,   # Primero-A -> Segundo-A
-        2: 5,   # Primero-B -> Segundo-B
-        3: 7,   # Primero-C -> Segundo-C
+      #  1: 4,   # Primero-A -> Segundo-A
+       # 2: 5,   # Primero-B -> Segundo-B
+     #   3: 7,   # Primero-C -> Segundo-C
         
-        4: 8,   # Segundo-A -> Tercero-A
-        5: 9,   # Segundo-B -> Tercero-B
-        7: 10,  # Segundo-C -> Tercero-C
+      #  4: 8,   # Segundo-A -> Tercero-A
+      #  5: 9,   # Segundo-B -> Tercero-B
+      #  7: 10,  # Segundo-C -> Tercero-C
         
         8: 12,  # Tercero-A -> Cuarto-A
         9: 13,  # Tercero-B -> Cuarto-B
