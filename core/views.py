@@ -1526,7 +1526,6 @@ def download_course_csv(request, course_id):
                          student['firstname'], student['lastname'], student['course']])
     
     return response
-    return response
 
 #student history
 def student_detail(request, student_id):

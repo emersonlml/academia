@@ -8,8 +8,7 @@ class Materia(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name='Descripción')
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'profesores'}, verbose_name='Profesor')
     class_quantity = models.PositiveIntegerField(default=0, verbose_name='Cantidad de clases')
-    #boton de activacion
-    activate_grading = models.BooleanField(default=True, verbose_name='Activar Calificaciones')  # Nuevo campo
+    activate_grading = models.BooleanField(default=True, verbose_name='Activar Calificaciones')
     
     def __str__(self):
         return self.name
@@ -59,13 +58,11 @@ class Attendance(models.Model):
 class Mark(models.Model):
     materia = models.ForeignKey(Materia, on_delete=models.CASCADE, verbose_name='Materia')
     student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante')
-    # Notas ahora solo trimestral
     mark_1 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Primer trimestre')
     mark_2 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Segundo trimestre')
     mark_3 = models.PositiveIntegerField(null=True, blank=True, verbose_name='Tercer trimestre')
     average = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name='Promedio')
-    #para poder poner un mensaje
-   # teacher_message = models.TextField(null=True, blank=True)  # Campo para el mensaje del profesor
+   
 
     def __str__(self):
         return f'{self.materia} - {self.student}'
@@ -79,19 +76,13 @@ class Mark(models.Model):
             return None
 
     def save(self, *args, **kwargs):
-            # Verifico si alguna nota cambio
             if self.mark_1 or self.mark_2 or self.mark_3:
-                self.average = self.calculate_average()     # Calcular el promedio (llamo a una función)
+                self.average = self.calculate_average()    
             super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Nota'
         verbose_name_plural = 'Notas'
-        #notas 
-        #mover estudente a curso
-    def is_approved(self):
-        # Aquí puedes ajustar el valor de aprobación según tu criterio, por ejemplo, si el promedio es 60 o más
-        return self.average is not None and self.average >= 51
     
 #controla notas prof
 class GlobalConfig(models.Model):
@@ -104,8 +95,6 @@ class GlobalConfig(models.Model):
     def get_solo_config():
         config, created = GlobalConfig.objects.get_or_create(id=1)
         return config
-#controla notas estudent
-
 
 #model para asistencia de profesores tabla primero
 class CITeacher(models.Model):
@@ -136,20 +125,6 @@ class TeacherAttendance(models.Model):
     def __str__(self):
         return f'{self.teacher.first_name} {self.teacher.last_name} - Entrada: {self.entry_time} / Salida: {self.exit_time}'
     
-
-#excluidos
-class ExcludedStudent(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante')
-    course = models.CharField(max_length=90, verbose_name='Curso')
-    reason = models.CharField(max_length=255, verbose_name='Razón de Exclusión')
-
-    def __str__(self):
-        return f"{self.student.username} - {self.course} ({self.reason})"
-
-    class Meta:
-        verbose_name = 'Estudiante Excluido'
-        verbose_name_plural = 'Estudiantes Excluidos'
-        
 
 #subir pdf horario
 class Schedule(models.Model):
@@ -186,4 +161,3 @@ class StudentDocument(models.Model):
 
     def __str__(self):
         return f"Documento de {self.history.student.username} ({self.description})"
-#model para sigiente ACTIVAR VER NOTAS ESTUDNET
