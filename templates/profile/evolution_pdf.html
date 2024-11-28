@@ -130,15 +130,15 @@
             <!-- Imagen de perfil del estudiante -->
             <img src="{{ student_data.profile_image_url }}" alt="{{ student_data.first_name }}" class="profile-picture">
             <!-- Nombre del estudiante -->
-            <h1>Evolución de {{ student_data.first_name }} {{ student_data.last_name }}</h1>
+            <h1>Notas Trimestrales de: {{ student_data.first_name }} {{ student_data.last_name }}</h1>
         </div>
 
         <h2>Materia: {{ materiaName }}</h2>
         <h4>Profesor: {{ teacher }}</h4>
         <hr>
         <br><br>
-        <h3>EVALUACIONES</h3>
-        <p>Evaluaciones realizadas por el profesor a lo largo del curso</p>
+        <h3>Notas</h3>
+        <p>Notas Trimestrales btenidas en el transcurso del año</p>
 
         <table class="table table-success table-striped">
             <thead>

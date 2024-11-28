@@ -136,16 +136,27 @@ class Schedule(models.Model):
         return self.name
 #student hystori
 class StudentHistory(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante')
+    student = models.ForeignKey(
+        User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'estudiantes'}, verbose_name='Estudiante'
+    )
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Curso')
     enrollment_date = models.DateField()
     completion_date = models.DateField()
     is_approved = models.BooleanField()
-    final_average = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, verbose_name='Promedio Final')
+    final_average = models.DecimalField(
+        max_digits=3, decimal_places=1, null=True, blank=True, verbose_name='Promedio Final'
+    )
     comment = models.TextField(null=True, blank=True, verbose_name='Comentario')
-    
-    # Nuevo campo para almacenar notas detalladas (en formato JSON o texto estructurado)
-    detailed_grades = models.JSONField(null=True, blank=True, verbose_name='Notas Detalladas')  # Si usas PostgreSQL
+    detailed_grades = models.JSONField(
+        null=True, blank=True, verbose_name='Notas Detalladas'
+    )  # Si usas PostgreSQL
+
+    def save(self, *args, **kwargs):
+        # Calcula promedio final de las notas del curso anterior si no se establece explícitamente
+        if self.final_average is None and self.student and self.course:
+            marks = Mark.objects.filter(student=self.student, materia__courses=self.course)
+            self.final_average = marks.aggregate(models.Avg('average'))['average__avg']
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Historial de {self.student.username} en {self.course.name}"

@@ -11,10 +11,8 @@ from .views import attendance_prof,CourseDetailView
 from .views import AddUsersFromCSVView
 from django.contrib.auth import views as auth_views
 from .views import  DeleteUserView,HorarioView,RegisterEntryOrExitView,GetMateriasByCourseView,ScheduleDetailView
-from .views import MateriaEditView,ToggleViewEvolutionView,SinPermisoView
+from .views import MateriaEditView,ToggleViewEvolutionView,SinPermisoView,MoveStudentView
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
 
 
 
@@ -105,12 +103,20 @@ urlpatterns = [
   path('generate_course_preview/<int:course_id>/', views.generate_course_preview, name='generate_course_preview'),
   path('download_course_csv/<int:course_id>/', views.download_course_csv, name='download_course_csv'),
   #sigiente curso
-  path('promote-students/', views.promote_students_view, name='promote_students'),
 
   path('generate-and-save-schedule-pdf/', views.generate_and_save_schedule_pdf, name='generate_and_save_schedule_pdf'),
   #ver notas estudent
   path('toggle-view-evolution/', ToggleViewEvolutionView.as_view(), name='toggle_view_evolution'),
   path('sin_permiso/',login_required(SinPermisoView.as_view()), name='SinPermiso'),
+  #obtener alumnos course_detail
+  path('get_course_students/<int:course_id>/', views.get_course_students, name='get_course_students'),
+  # mover estudintes a otro curso
 
+ path('move_students/', views.move_students_to_course, name='move_students'),
+path('get_available_courses/<int:current_course_id>/', views.get_available_courses, name='get_available_courses'),
+
+
+ path('move-student/<int:course_id>/', MoveStudentView.as_view(), name='move_student'),
 
 ]
+

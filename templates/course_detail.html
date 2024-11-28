@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% include 'previa_del_estudiante_modal.html' %}
 
 {% block content %}
 
@@ -57,11 +56,15 @@
 </style>
 
 <div class="container mt-4">
-    <div class="course-header">
+    <div class="course-header">   
         <h1>Curso: {{ course.name }}</h1>
         <p>{{ course.description }}</p>
     </div>
-
+    <!---->
+ <!-- Cambiar el botón para redirigir a move_student -->
+ <a href="{% url 'move_student' course.id %}" class="btn btn-info">Vista previa de estudiantes</a>
+  <!-- Modal para listar estudiantes y seleccionar curso destino -->
+    <!--END-->
     <hr class="my-4">
     <div class="course-materias mt-5">
         <h2>Materias del curso {{ course.name }}</h2>
@@ -81,7 +84,6 @@
             Generar Excel
         </a>
         <!-- Botón para abrir el modal -->
-        <button onclick="openStudentModal({{ course.id }})" class="btn btn-info">Vista previa de estudiantes</button>
     </div>
 
     <form method="POST" action="{% url 'profile' %}">
@@ -95,18 +97,29 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="studentModalLabel">Vista previa de estudiantes</h5>
+                <h5 class="modal-title" id="studentModalLabel">Mover Estudiantes</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h6>Estudiantes Aprobados (Promedio > 51)</h6>
-                <ul id="eligibleStudentsList"></ul>
+                <form id="moveStudentsForm">
+                    <h6>Estudiantes:</h6>
+                    <ul id="studentList">
+                        <!-- Aquí se agregarán dinámicamente los estudiantes -->
+                    </ul>
 
-                <h6>Estudiantes Reprobados</h6>
-                <ul id="ineligibleStudentsList"></ul>
+                    <h6 class="mt-3">Seleccionar Curso Destino:</h6>
+                    <select id="targetCourse" name="targetCourse" required>
+                        <option value="" disabled selected>Selecciona un curso</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+
+                </form>
             </div>
             <div class="modal-footer">
-                <a id="downloadCsvLink" href="#" class="btn btn-info">Descargar CSV</a>
+                <button type="button" class="btn btn-primary" onclick="moveStudents()">Mover Estudiantes</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -115,31 +128,151 @@
 
 <script>
     function openStudentModal(courseId) {
-        fetch(`/generate_course_preview/${courseId}/`)
+        fetch(`/get_course_students/${courseId}/`)
             .then(response => response.json())
             .then(data => {
-                const eligibleList = document.getElementById('eligibleStudentsList');
-                const ineligibleList = document.getElementById('ineligibleStudentsList');
-
-                eligibleList.innerHTML = '';
-                ineligibleList.innerHTML = '';
-
-                data.eligible_students.forEach(student => {
-                    eligibleList.innerHTML += `<li>${student.firstname} ${student.lastname} - ${student.email}</li>`;
+                const studentList = document.getElementById('studentList');
+                studentList.innerHTML = '';
+    
+                data.students.forEach(student => {
+                    studentList.innerHTML += `
+                        <li>
+                            <input type="checkbox" value="${student.id}" class="student-checkbox">
+                            ${student.name}
+                        </li>
+                    `;
                 });
-
-                data.ineligible_students.forEach(student => {
-                    ineligibleList.innerHTML += `<li>${student.firstname} ${student.lastname} - ${student.email}</li>`;
-                });
-
-                // Set the download link URL for CSV
-                document.getElementById('downloadCsvLink').href = `/download_course_csv/${courseId}/`;
-
-                // Show the modal
+    
                 $('#studentModal').modal('show');
             })
-            .catch(error => console.error('Error fetching student data:', error));
+            .catch(error => console.error('Error fetching students:', error));
     }
+    
+    function moveStudents() {
+        const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(checkbox => checkbox.value);
+        const targetCourseId = document.getElementById('targetCourse').value;
+        const currentCourseId = {{ course.id }}; // El ID del curso actual que se pasa desde Django
+        
+        if (!selectedStudents.length || !targetCourseId) {
+            alert('Por favor, selecciona estudiantes y un curso destino.');
+            return;
+        }
+        
+        // Enviar la solicitud para mover los estudiantes
+        fetch('/move_students/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // CSRF Token
+            },
+            body: JSON.stringify({
+                student_ids: selectedStudents,  // Lista de estudiantes seleccionados
+                target_course_id: targetCourseId,  // ID del curso destino
+                current_course_id: currentCourseId  // ID del curso actual
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message); // Mensaje de éxito
+                $('#studentModal').modal('hide');
+                location.reload(); // Recargar la página para ver los cambios
+            } else {
+                alert('Error: ' + data.error); // Mensaje de error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al mover los estudiantes.');
+        });
+    }
+    
+    function loadCourses(currentCourseId) {
+        fetch(`/get_available_courses/${currentCourseId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener los cursos disponibles');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const courseSelect = document.getElementById('targetCourse');
+                courseSelect.innerHTML = '<option value="" disabled selected>Selecciona un curso</option>';
+                data.courses.forEach(course => {
+                    courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
+                });
+            })
+            .catch(error => console.error('Error fetching courses:', error));
+    }
+    
+    // Llama a esta función al abrir el modal
+    loadCourses({{ course.id }});
+    
+    //modal 20
+   // Captura el botón de "Mover Estudiantes"
+   document.getElementById('moverEstudiantesBtn').addEventListener('click', function () {
+    // Obtén el valor seleccionado del select (curso destino)
+    const selectedCourseId = document.getElementById('targetCourse').value;
+    const selectedStudents = Array.from(
+        document.querySelectorAll('input[name="student"]:checked')
+    ).map(input => input.value);
+
+    console.log('ID del curso destino:', selectedCourseId);
+console.log('IDs de los estudiantes seleccionados:', selectedStudents);
+
+    // Valida que se hayan seleccionado estudiantes y curso destino
+    if (!selectedCourseId) {
+        alert("Por favor selecciona un curso destino.");
+        return;
+    }
+    if (selectedStudents.length === 0) {
+        alert("Por favor selecciona al menos un estudiante.");
+        return;
+    }
+
+    // Envía los datos al servidor usando fetch
+    fetch('/move_students/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') // Necesario para la protección CSRF
+        },
+        body: JSON.stringify({
+            targetCourseId: selectedCourseId, // ID del curso destino
+            studentIds: selectedStudents     // IDs de los estudiantes seleccionados
+        })
+    })
+    .then(response => response.json()) // Convertimos la respuesta a JSON
+    .then(data => {
+        if (data.success) {
+            alert("Estudiantes movidos exitosamente.");
+            location.reload(); // Recarga la página para reflejar los cambios
+        } else {
+            alert("Error al mover estudiantes: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Ocurrió un error al procesar la solicitud.");
+    });
+});
+
+// Función para obtener el token CSRF (necesario para solicitudes POST en Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Verifica que el nombre del cookie coincida
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 
 <!-- Cargar jQuery y Bootstrap -->

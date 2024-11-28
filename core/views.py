@@ -45,6 +45,11 @@ from weasyprint import HTML
 from io import BytesIO
 import base64
 from .models import StudentHistory, User
+from django.db import transaction
+from datetime import date
+from django.db.models import Avg
+from django.db import transaction
+
 
 
 # FUNCION PARA CONVERTIR EL PLURAL DE UN GRUPO A SU SINGULAR
@@ -434,12 +439,12 @@ class ListEstudent(TemplateView):
 
         # Filtra las marcas de la materia y utiliza un set para evitar duplicados
         marks = Mark.objects.filter(materia=materia).select_related('student')
-        unique_students = set()  # Usamos un set para almacenar estudiantes únicos
+        unique_students = set() 
 
         student_data = []
         for mark in marks:
             if mark.student.id not in unique_students:
-                unique_students.add(mark.student.id)  # Agregamos el ID del estudiante al set
+                unique_students.add(mark.student.id)
                 student_data.append({
                     'mark_id': mark.id,
                     'name': mark.student.get_full_name(),
@@ -668,7 +673,7 @@ def materia_detail(request, materia_id):
     return render(request, 'materia_detail.html', {
         'materia': materia,
         'estudiantes': estudiantes,
-        'teacher': materia.teacher  # Agregamos el profesor al contexto
+        'teacher': materia.teacher 
     })
 
     #cambair contraseña de usuario
@@ -1537,60 +1542,220 @@ def student_detail(request, student_id):
         'history': history,
     })
 #siguente curso
-def promote_students_view(request):
-    # Diccionario que define las relaciones de promoción entre cursos
-    promotion_paths = {
-      #  1: 4,   # Primero-A -> Segundo-A
-       # 2: 5,   # Primero-B -> Segundo-B
-     #   3: 7,   # Primero-C -> Segundo-C
-        
-      #  4: 8,   # Segundo-A -> Tercero-A
-      #  5: 9,   # Segundo-B -> Tercero-B
-      #  7: 10,  # Segundo-C -> Tercero-C
-        
-        8: 12,  # Tercero-A -> Cuarto-A
-        9: 13,  # Tercero-B -> Cuarto-B
-        10: 14, # Tercero-C -> Cuarto-C
-        11: 15, # Tercero-D -> Cuarto-D
-        
-        12: 16, # Cuarto-A -> Quinto-A
-        13: 17, # Cuarto-B -> Quinto-B
-        14: 18, # Cuarto-C -> Quinto-C
-        15: 19, # Cuarto-D -> Quinto-D
-        
-        16: 20, # Quinto-A -> Sexto-A
-        17: 21, # Quinto-B -> Sexto-B
-        18: 22, # Quinto-C -> Sexto-C
-        19: 23, # Quinto-D -> Sexto-D
+def move_student_with_history(student, current_course, new_course):
+    """
+    Mueve un estudiante de un curso a otro, archivando su historial y gestionando sus relaciones con notas y materias.
+    """
+    try:
+        with transaction.atomic():
+            # 1. Obtener notas actuales del estudiante en el curso anterior
+            marks = Mark.objects.filter(student=student, materia__in=current_course.materias.all())
+
+            # 2. Calcular promedio final del curso anterior
+            final_average = marks.aggregate(average=Avg('average'))['average'] or 0
+
+            # 3. Crear el historial del curso anterior
+            history = StudentHistory.objects.create(
+                student=student,
+                course=current_course,
+                enrollment_date=Registration.objects.get(student=student, course=current_course).created_at,  # Si tienes este campo
+                completion_date=date.today(),
+                is_approved=final_average >= 51,  # Aprobado si cumple el promedio
+                final_average=final_average,
+                detailed_grades={mark.materia.name: {
+                    'mark_1': mark.mark_1,
+                    'mark_2': mark.mark_2,
+                    'mark_3': mark.mark_3,
+                    'average': mark.average
+                } for mark in marks},
+                comment=f"Promedio final: {final_average}. Transición a {new_course.name}."
+            )
+
+            # 4. Eliminar las notas del curso anterior
+            marks.delete()
+
+            # 5. Actualizar la inscripción del estudiante al nuevo curso
+            registration = Registration.objects.get(student=student, course=current_course)
+            registration.course = new_course
+            registration.save()
+
+            # 6. Crear nuevas notas para las materias del nuevo curso
+            new_materias = new_course.materias.all()
+            for materia in new_materias:
+                Mark.objects.get_or_create(student=student, materia=materia)
+
+            return True
+    except Exception as e:
+        print(f"Error al mover al estudiante con historial: {e}")
+        return False
+
+
+#modal de estudiantes del curso
+def get_course_students(request, course_id):
+    """
+    Devuelve los estudiantes registrados en un curso específico como JSON.
+    """
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Obtener inscripciones activas de estudiantes para el curso
+    registrations = Registration.objects.filter(course=course, enabled=True).select_related('student')
+
+    # Crear una lista de estudiantes con datos básicos
+    student_data = [
+        {
+            'name': f"{reg.student.first_name} {reg.student.last_name}",
+            #'email': reg.student.email,
+        }
+        for reg in registrations
+    ]
+
+    return JsonResponse({'students': student_data})
+
+#movel student course
+@csrf_exempt
+def move_students_to_course(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            student_ids = data.get('student_ids', [])
+            target_course_id = data.get('target_course_id')
+            current_course_id = data.get('current_course_id')
+
+            # Validar cursos
+            current_course = get_object_or_404(Course, id=current_course_id)
+            target_course = get_object_or_404(Course, id=target_course_id)
+
+            # Validar estudiantes
+            registrations = Registration.objects.filter(
+                course=current_course, student_id__in=student_ids
+            )
+            if not registrations.exists():
+                return JsonResponse({'error': 'No se encontraron estudiantes válidos para mover.'}, status=400)
+
+            # Actualizar inscripciones
+            registrations.update(course=target_course)
+            return JsonResponse({'message': 'Estudiantes movidos exitosamente.'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+def course_detail(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    all_courses = Course.objects.exclude(id=course_id)  # Excluye el curso actual
+    materias = course.materias.all()
+
+    context = {
+        'course': course,
+        'materias': materias,
+        'all_courses': all_courses
     }
+    return render(request, 'course_detail.html', context)
 
-    # Procesar cada curso en promotion_paths
-    for current_course_id, next_course_id in promotion_paths.items():
-        current_course = Course.objects.get(id=current_course_id)
-        next_course = Course.objects.get(id=next_course_id)
-        
-        # Filtrar inscripciones activas en el curso actual
-        registrations = Registration.objects.filter(course=current_course, enabled=True)
-        
-        for registration in registrations:
-            student = registration.student
+def get_available_courses(request, current_course_id):
+    courses = Course.objects.exclude(id=current_course_id)  # Excluye el curso actual
+    course_data = [{'id': course.id, 'name': course.name} for course in courses]
+    return JsonResponse({'courses': course_data})
 
-            # Comprobar si el estudiante tiene un promedio >= 51 en todas las materias del curso actual
-            materias = current_course.materias.all()
-            all_materias_approved = True
+@csrf_exempt
+def move_students(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            target_course_id = data.get('targetCourseId')
+            student_ids = data.get('studentIds')
 
-            for materia in materias:
-                # Obtener la nota de la materia específica para el estudiante
-                mark = Mark.objects.filter(student=student, materia=materia).first()
-                
-                # Verificamos si la nota existe y si el promedio es mayor o igual a 51
-                if mark is None or mark.average is None or mark.average < 51:
-                    all_materias_approved = False
-                    break
+            print("Curso destino:", target_course_id)
+            print("Estudiantes seleccionados:", student_ids)
 
-            # Si el estudiante aprobó todas las materias, promoverlo
-            if all_materias_approved:
-                registration.course = next_course
+            # Valida los datos
+            if not target_course_id or not student_ids:
+                return JsonResponse({'success': False, 'error': 'Datos incompletos.'}, status=400)
+
+            # Realiza el movimiento de estudiantes
+            # (Agrega aquí tu lógica para actualizar los estudiantes)
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            print("Error interno:", e)
+            return JsonResponse({'success': False, 'error': 'Error interno en el servidor.'}, status=500)
+    return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+#view move 3
+@add_group_name_to_context
+class MoveStudentView(View):
+    template_name = 'profile/move_student.html'
+
+    def get_context_data(self, **kwargs):
+        course_id = self.kwargs['course_id']
+        course = get_object_or_404(Course, id=course_id)
+
+        # Obtener estudiantes del curso actual
+        students = User.objects.filter(groups__name='estudiantes', registration__course=course)
+
+        # Obtener todos los cursos disponibles para mover
+        courses = Course.objects.exclude(id=course_id)
+
+        # Combinar el contexto base con el proporcionado por el decorador
+        context = {
+            'course': course,
+            'students': students,
+            'courses': courses,
+        }
+        if hasattr(self, 'extra_context'):
+            context.update(self.extra_context)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        student_ids = request.POST.getlist('students')  # Usar getlist para obtener múltiples IDs
+        course_id = request.POST.get('course')
+
+        if not student_ids or not course_id:
+            messages.error(request, "Debes seleccionar al menos un estudiante y un curso.")
+            return redirect(request.path)
+
+        # Verificar que el curso existe
+        new_course = get_object_or_404(Course, id=course_id)
+
+        for student_id in student_ids:
+            # Verificar que el estudiante existe
+            student = get_object_or_404(User, id=student_id, groups__name='estudiantes')
+
+            # Obtener la inscripción del estudiante
+            registration = Registration.objects.filter(student=student).first()
+            if registration:
+                old_course = registration.course
+                registration.course = new_course
                 registration.save()
 
-    return render(request, 'promote_students.html', {'message': "Promoción completada."})
+                # Manejo de las notas
+                old_materias = old_course.materias.all()
+                new_materias = new_course.materias.all()
+
+                # Obtener los IDs de las materias
+                old_materia_ids = old_materias.values_list('id', flat=True)
+                new_materia_ids = new_materias.values_list('id', flat=True)
+
+                # Determinar las materias que ya no pertenecen al nuevo curso
+                materias_to_remove = set(old_materia_ids) - set(new_materia_ids)
+
+                # Eliminar las notas asociadas a las materias que ya no están en el curso nuevo
+                Mark.objects.filter(student=student, materia_id__in=materias_to_remove).delete()
+
+                # Crear notas para las nuevas materias
+                for materia in new_materias:
+                    Mark.objects.get_or_create(student=student, materia=materia)
+
+                messages.success(request, f"{student.get_full_name()} ha sido movido al curso {new_course.name}.")
+            else:
+                messages.error(request, f"No se encontró la inscripción del estudiante {student.get_full_name()}.")
+
+        return redirect(request.path)
+
+
+
