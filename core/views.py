@@ -1,3 +1,15 @@
+"""
+Autor: Emerson ibañez
+Fecha: 2025-01-30
+Descripción: 
+"""
+"""
+Autor: Emerson Ibañez
+Fecha: 30
+Proyecto: Sistema de Control Académico
+Descripción: 
+"""
+
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate,login,update_session_auth_hash
 from django.views.generic import TemplateView,CreateView,UpdateView,DeleteView,DetailView

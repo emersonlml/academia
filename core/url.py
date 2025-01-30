@@ -1,3 +1,16 @@
+"""
+Autor: Emerson ibañez
+Fecha: 2025-01-30
+Descripción: 
+"""
+"""
+Autor: Emerson Ibañez
+Fecha: 30
+Proyecto: Sistema de Control Académico
+Descripción:  ADV 2025
+"""
+
+
 from django.urls import path
 from .views import HomeView,PricingView,RegisterView,ProfileView,CoursesView,CourseCreateView,ErrorView, CourseEnrollmentView,CourseEditView,CourseDeleteView,StudentListMarkView,UpdateMarkView,ListEstudent
 from .views import ToggleAddNotesView,StudentListMarkViewsacction
@@ -124,4 +137,3 @@ path('view-books/', ViewBooksView.as_view(), name='view_books'),
 
 
 ]
-

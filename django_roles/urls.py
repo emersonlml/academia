@@ -1,3 +1,8 @@
+"""
+Autor: Emerson ibañez
+Fecha: 2025-01-30
+Descripción: 
+"""
 """django_roles URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -13,6 +18,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+"""
+Autor: Emerson Ibañez
+Fecha: 30
+Proyecto: Sistema de Control Académico
+Descripción:  ADV 2025
+"""
+
+
 from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings

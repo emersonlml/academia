@@ -1,3 +1,16 @@
+"""
+Autor: Emerson ibañez
+Fecha: 2025-01-30
+Descripción: 
+"""
+"""
+Autor: Emerson Ibañez
+Fecha: 30
+Proyecto: Sistema de Control Académico
+Descripción:  ADV 2025
+"""
+
+
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm,UserCreationForm

@@ -1,3 +1,16 @@
+"""
+Autor: Emerson ibañez
+Fecha: 2025-01-30
+Descripción: 
+"""
+"""
+Autor: Emerson Ibañez
+Fecha: 30
+Proyecto: Sistema de Control Académico
+Descripción:  ADV 2025
+"""
+
+
 from django.contrib.auth.models import Group
 from django.dispatch import receiver
 from django.db.models.signals import post_save
