@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from .forms import RegisterForm
 from django.views import View
 from .forms import RegisterForm,UserForm,ProfileForm,CourseForm,UserCreationForm,EditMateriaForm
-from .models import Course,Registration,Materia,Mark,GlobalConfig  
+from .models import Course,Registration,Materia,Mark,GlobalConfig 
 from django.urls import reverse_lazy,reverse
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin,LoginRequiredMixin
@@ -49,6 +49,8 @@ from django.db import transaction
 from datetime import date
 from django.db.models import Avg
 from django.db import transaction
+from .models import Book
+from .forms import BookForm
 
 
 
@@ -235,17 +237,13 @@ class ProfileView(TemplateView):
 class CoursesView(UserPassesTestMixin,TemplateView):
     def test_func(self):
         user = self.request.user
-        # Verificar si el usuario es superusuario o pertenece al grupo 'secretarias'
         return user.is_superuser or user.groups.filter(name='secretarias').exists()
     def handle_no_permission(self):
-        # Redirigir a una plantilla de error si el usuario no tiene permiso
         return redirect('error')
     template_name = 'courses.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         courses = Course.objects.all().order_by('-id')
-        #esto es para contar nr de alumnos
-        #end
         context['courses'] = courses
         return context
 
@@ -378,15 +376,15 @@ class StudentListMarkView(LoginRequiredMixin,UserPassesTestMixin, TemplateView):
                 }
 
         context['materia'] = materia
-        context['student_data'] = list(student_data.values())  # Convertir el diccionario a lista
+        context['student_data'] = list(student_data.values()) 
         return context
     def dispatch(self, request, *args, **kwargs):
         config = GlobalConfig.get_solo_config()
-        print(f"allow_add_notes: {config.allow_add_notes}")  # Log para verificar el estado
+        print(f"allow_add_notes: {config.allow_add_notes}") 
         if not config.allow_add_notes:
             #print("Redirigiendo a la vista de error") Verificar si entra en esta lógica
             messages.error(request, 'No está permitido agregar notas en este momento.')
-            return redirect(reverse('SinPermiso'))  # Asegúrate de que el nombre de la URL sea correcto
+            return redirect(reverse('SinPermiso')) 
         return super().dispatch(request, *args, **kwargs)
 
 #sin permiso profesores
@@ -708,6 +706,8 @@ class ProfilePasswordChangeView(PasswordChangeView):
         return super().form_invalid(form)
 
 # AGREGAR UN NUEVO USUARIO
+from django.db import IntegrityError
+
 @add_group_name_to_context
 class AddUserView(UserPassesTestMixin, LoginRequiredMixin, CreateView):
     model = User
@@ -715,10 +715,14 @@ class AddUserView(UserPassesTestMixin, LoginRequiredMixin, CreateView):
     template_name = 'add_user.html'
     success_url = '/profile/'
 
+    def form_invalid(self, form):
+        # Pasar los errores del formulario al contexto
+        return self.render_to_response(self.get_context_data(form=form, errors=form.errors))
+
     def test_func(self):
         user = self.request.user
         return user.is_superuser or user.groups.filter(name='secretarias').exists()
-    
+
     def handle_no_permission(self):
         return redirect('error')
 
@@ -729,28 +733,41 @@ class AddUserView(UserPassesTestMixin, LoginRequiredMixin, CreateView):
         singular_groups = [plural_to_singular(group.name).capitalize() for group in groups]
         context['groups'] = zip(groups, singular_groups)
         context['courses'] = courses
+        context['errors'] = kwargs.get('errors', None)  # Agregar los errores al contexto
+
         return context
 
     def form_valid(self, form):
         group_id = self.request.POST['group']
-        course_id = self.request.POST.get('course')  # Obtener el curso seleccionado
+        course_id = self.request.POST.get('course')
         group = Group.objects.get(id=group_id)
-        user = form.save(commit=False)
-        user.set_password('contraseña')  
-        if group_id != '1':
-            user.is_staff = True
-        user.save()
-        user.groups.clear()
-        user.groups.add(group)
 
-        # Inscribir al estudiante en el curso seleccionado si es del grupo 'estudiantes'
-        if group.name == 'estudiantes' and course_id:
-            course = Course.objects.get(id=course_id)
-            Registration.objects.create(course=course, student=user)
- # Agregar mensaje de éxito
-        messages.success(self.request, f'Usuario {user.username} creado exitosamente.')
+        try:
+            # Guardar el usuario
+            user = form.save(commit=False)
+            user.set_password('contraseña')  
+            if group_id != '1':
+                user.is_staff = True
+            user.save()
 
-        return super().form_valid(form)
+            # Asignar grupo al usuario
+            user.groups.clear()
+            user.groups.add(group)
+
+            # Inscribir al estudiante en el curso, si corresponde
+            if group.name == 'estudiantes' and course_id:
+                course = Course.objects.get(id=course_id)
+                Registration.objects.create(course=course, student=user)
+
+            messages.success(self.request, f'Usuario {user.username} creado exitosamente.')
+            return super().form_valid(form)
+        
+        except IntegrityError:
+            messages.error(self.request, 'El nombre de usuario ya está en uso. Por favor, elige otro.')
+            return self.form_invalid(form)
+
+    def get_success_url(self):
+        return reverse('add_user')
 
 
 # Vista adicional para obtener materias relacionadas con un curso específico
@@ -881,10 +898,7 @@ def superuser_edit(request, user_id):
 
 #genera pdf profesor
 def generate_pdf_student_list(request, materia_id):
-    # Obtener la materia y verificar que exista
     materia = get_object_or_404(Materia, id=materia_id)
-    
-    # Obtener los estudiantes y sus notas
     marks = Mark.objects.filter(materia=materia)
 
     student_data = {}
@@ -945,8 +959,7 @@ def generate_pdf_student_list(request, materia_id):
 #genera excel admin
 def generate_course_excel(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    # Obtener las materias y ordenarlas por id
-    materias = course.materias.all().order_by('id')  # Orden por ID ascendente
+    materias = course.materias.all().order_by('id')
 
     # Obtener la lista de estudiantes y sus notas
     students = []
@@ -963,19 +976,15 @@ def generate_course_excel(request, course_id):
     ws = wb.active
     ws.title = f"Curso {course.name}"
 
-    # Estilo para la cabecera (verde claro)
     header_fill = PatternFill(start_color="CCFFCC", end_color="CCFFCC", fill_type="solid")
     bold_font = Font(bold=True)
 
-    # Colocar el nombre del curso en A1
     ws["A1"] = f"Curso: {course.name}"
     ws["A1"].font = bold_font
 
-    # Escribir el encabezado con las materias fusionadas
     row_num = 2
-    ws.append(["Estudiante"])  # Colocar el encabezado de estudiante en la columna A
+    ws.append(["Estudiante"]) 
 
-    # Fusionar celdas para los nombres de las materias y agregar las columnas de notas debajo
     col_start = 2  # Empezar en la columna B
     for materia in materias:
         ws.merge_cells(start_row=row_num, start_column=col_start, end_row=row_num, end_column=col_start + 3)
@@ -1103,7 +1112,7 @@ class attendance_prof(UserPassesTestMixin, ListView):
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
 
-        print(f"Start Date: {start_date}, End Date: {end_date}")  # Debugging print
+        print(f"Start Date: {start_date}, End Date: {end_date}")  
 
     # Verificar si las fechas están presentes
         if start_date and end_date:
@@ -1266,6 +1275,7 @@ class HorarioView(UserPassesTestMixin, LoginRequiredMixin, TemplateView):
 
         context['draggable_enabled'] = True
         return context
+
 #para subir pdf de horario
 def upload_schedule(request):
     if request.method == 'POST':
@@ -1356,10 +1366,10 @@ def generate_and_save_schedule_pdf(request):
 #acivar notas estudnet
 class ToggleViewEvolutionView(View):
     def post(self, request, *args, **kwargs):
-        if request.user.groups.filter(name='administrativos').exists():  # Verifica que sea administrativo
+        if request.user.groups.filter(name='administrativos').exists(): 
             is_active = request.POST.get('is_active') == 'true'
             config, created = GlobalConfig.objects.get_or_create(id=1)
-            config.allow_view_evolution = is_active  # Actualiza el nuevo campo
+            config.allow_view_evolution = is_active  
             config.save()
             messages.success(request, 'La configuración para Consultar Evolución ha sido actualizada.')
         else:
@@ -1370,40 +1380,32 @@ class ToggleViewEvolutionView(View):
 @add_group_name_to_context 
 class ScheduleDetailView(View):
     def get(self, request, *args, **kwargs):
-        # Obtener al estudiante logueado
         student = request.user
-
-        # Verificar si el estudiante está inscrito en un curso
         registration = Registration.objects.filter(student=student, enabled=True).first()
 
         if registration:
-            # Obtener el curso del estudiante
             course = registration.course
-
-            # Filtrar los horarios que coinciden con el nombre del curso
             schedules = Schedule.objects.filter(name__icontains=course.name)
 
-            # Verificar si existen horarios para el curso
             if schedules.exists():
                 context = {
                     'course': course,
                     'schedules': schedules
                 }
-                # Combinar el contexto extra proporcionado por el decorador con el contexto específico de la vista
-                context.update(self.extra_context)  # Incluye el contexto adicional del decorador
+                context.update(self.extra_context) 
 
                 return render(request, 'horario_student/schedule_detail.html', context)
             else:
                 context = {
                     'course': course
                 }
-                context.update(self.extra_context)  # Incluir el contexto del decorador también aquí
+                context.update(self.extra_context) 
                 return render(request, 'horario_student/no_schedule_found.html', context)
         else:
             context = {
                 'student': student
             }
-            context.update(self.extra_context)  # También agregamos el contexto del decorador
+            context.update(self.extra_context) 
             return render(request, 'horario_student/no_registration.html', context)
 #editar materias 
 @add_group_name_to_context
@@ -1456,9 +1458,7 @@ class MateriaEditView(View):
         return render(request, self.template_name, context)
     
 #template de fin de año
-@add_group_name_to_context
-class FinAnoView(TemplateView):
-    template_name = 'fin_ano.html'
+
 
 #generar csv de cada curso con estudiantes aprobados en almenos materia
 def generate_course_preview(request, course_id):
@@ -1691,13 +1691,10 @@ class MoveStudentView(View):
         course_id = self.kwargs['course_id']
         course = get_object_or_404(Course, id=course_id)
 
-        # Obtener estudiantes del curso actual
         students = User.objects.filter(groups__name='estudiantes', registration__course=course)
 
-        # Obtener todos los cursos disponibles para mover
         courses = Course.objects.exclude(id=course_id)
 
-        # Combinar el contexto base con el proporcionado por el decorador
         context = {
             'course': course,
             'students': students,
@@ -1757,5 +1754,41 @@ class MoveStudentView(View):
 
         return redirect(request.path)
 
+#libros
+@add_group_name_to_context
+class ManageBooksView(ListView):
+    model = Book
+    template_name = 'book/manage_books.html'
+    context_object_name = 'books'
 
+# Vista para añadir libros
+@add_group_name_to_context
+class AddBookView(CreateView):
+    model = Book
+    form_class = BookForm
+    template_name = 'book/add_book.html'
+    success_url = reverse_lazy('manage_books')
 
+# Vista para editar libros
+@add_group_name_to_context
+class EditBookView(UpdateView):
+    model = Book
+    form_class = BookForm
+    template_name = 'book/edit_book.html'
+    success_url = reverse_lazy('manage_books')
+
+# Vista para eliminar libros
+@add_group_name_to_context
+class DeleteBookView(DeleteView):
+    model = Book
+    template_name = 'book/delete_book.html'
+    success_url = reverse_lazy('manage_books')
+
+# Vista para que los estudiantes puedan ver los libros
+@add_group_name_to_context
+class ViewBooksView(ListView):
+    model = Book
+    template_name = 'book/view_books.html'
+    context_object_name = 'books'
+    
+#paginacion estudent

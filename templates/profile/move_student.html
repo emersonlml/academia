@@ -2,55 +2,131 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="text-center">Mover Estudiantes entre Cursos</h1>
-    <p class="text-muted text-center">Selecciona un estudiante y un curso destino para moverlo.</p>
-    
-    <form method="POST">
-        {% csrf_token %}
-        
-        <!-- Selección de estudiantes (permite múltiples) -->
-       <!-- Selección de estudiantes con checkboxes -->
-            <div class="mb-3">
-                <label class="form-label"><strong>Seleccionar Estudiantes:</strong></label>
-                <div class="form-check">
-                    {% for student in students %}
-                    <div class="form-check">
-                        <input 
-                            class="form-check-input" 
-                            type="checkbox" 
-                            name="students" 
-                            value="{{ student.id }}" 
-                            id="student-{{ student.id }}">
-                        <label class="form-check-label" for="student-{{ student.id }}">
-                            {{ student.get_full_name }}
-                        </label>
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+            <h2>Mover Estudiantes entre Cursos</h2>
+            <p class="mb-0">Selecciona un estudiante y un curso destino para moverlo.</p>
+        </div>
+        <div class="card-body">
+            <form method="POST" id="moveStudentsForm">
+                {% csrf_token %}
+
+                <!-- Selección de estudiantes con checkboxes -->
+                <div class="mb-4">
+                    <label class="form-label"><strong>Seleccionar Estudiantes:</strong></label>
+                    <div class="row row-cols-1 row-cols-md-2">
+                        {% for student in students %}
+                        <div class="form-check col">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="students" 
+                                value="{{ student.id }}" 
+                                id="student-{{ student.id }}">
+                            <label class="form-check-label" for="student-{{ student.id }}">
+                                {{ student.get_full_name }}
+                            </label>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No hay estudiantes disponibles para mover.</p>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
+
+                <!-- Selección del curso destino -->
+                <div class="mb-4">
+                    <label for="course" class="form-label"><strong>Seleccionar Curso Destino:</strong></label>
+                    <select id="course" name="course" class="form-select" required>
+                        <option value="" disabled selected>Selecciona un curso</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div id="errorMessage" class="text-danger text-center mb-3" style="display: none;">
+                    Por favor, selecciona al menos un estudiante antes de continuar.
+                </div>
+
+                <!-- Botón de envío con validación -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-success btn-lg px-5" id="validateButton">
+                        Mover Estudiante
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{% url 'course_detail' course.id %}"class="btn btn-secondary">Volver al Curso</a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmar Movimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas mover los estudiantes seleccionados al curso destino?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="moveStudentsForm" class="btn btn-primary">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-        <!-- Selección del curso destino -->
-        <div class="mb-3">
-            <label for="course" class="form-label"><strong>Seleccionar Curso Destino:</strong></label>
-            <select id="course" name="course" class="form-select" required>
-                <option value="" disabled selected>Selecciona un curso</option>
-                {% for course in courses %}
-                <option value="{{ course.id }}">{{ course.name }}</option>
+<!-- Modal de éxito -->
+{% if messages %}
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                {% for message in messages %}
+                <p>{{ message }}</p>
                 {% endfor %}
-            </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
         </div>
-
-        <!-- Botón de envío -->
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Mover Estudiante</button>
-        </div>
-    </form>
+    </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Mostrar el modal de éxito automáticamente si hay mensajes
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    });
+</script>
+{% endif %}
 
-<div class="text-center mt-4">
-    <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Volver al Curso</a>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('validateButton').addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('input[name="students"]:checked');
+        const errorMessage = document.getElementById('errorMessage');
 
+        if (checkboxes.length === 0) {
+            // Mostrar mensaje de error si no hay estudiantes seleccionados
+            errorMessage.style.display = 'block';
+        } else {
+            // Ocultar mensaje de error y mostrar el modal
+            errorMessage.style.display = 'none';
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+    });
+</script>
 {% endblock %}

@@ -5,7 +5,7 @@ from .views import CoursesView_list,MateriaListView,materia_detail,superuser_edi
 from .views import AdminProfesoresView,search_profesores,ProfilePasswordChangeView,AddUserView,CustomLoginView,UserDetailsView
 from .views import evolution
 from django.contrib.auth.decorators import login_required
-from core.views import generate_pdf_student_list,UnidadEducativaView,FinAnoView
+from core.views import generate_pdf_student_list,UnidadEducativaView
 from .views import generate_course_excel
 from .views import attendance_prof,CourseDetailView
 from .views import AddUsersFromCSVView
@@ -13,6 +13,8 @@ from django.contrib.auth import views as auth_views
 from .views import  DeleteUserView,HorarioView,RegisterEntryOrExitView,GetMateriasByCourseView,ScheduleDetailView
 from .views import MateriaEditView,ToggleViewEvolutionView,SinPermisoView,MoveStudentView
 from . import views
+from .views import ManageBooksView, AddBookView, EditBookView, DeleteBookView, ViewBooksView
+
 
 
 
@@ -83,40 +85,43 @@ urlpatterns = [
     #registroprf -admin
     path('register-entry-exit/', login_required(RegisterEntryOrExitView.as_view()), name='register_entry_or_exit'),
     path('attendance-prof/', login_required(attendance_prof.as_view()), name='attendance_prof'),
-  # path('attendance_report/', AttendanceReportView.as_view(), name='attendance_report'),
-  #csv
-  path('add-users-from-csv/', login_required(AddUsersFromCSVView.as_view()), name='add_users_from_csv'),
-  # delete usuarios
-  path('delete_user/<int:pk>/', DeleteUserView.as_view(), name='delete_user'),  
-  #horario
-  path('horario/', login_required(HorarioView.as_view()), name='weekly_schedule'),
-  # cambio de profesores por materia
-  path('edit-materia/', MateriaEditView.as_view(), name='materia_edit'),
-  #acerda del cole
-  path('fin-anio/', FinAnoView.as_view(), name='fin_anio'),
-  #subir pdf de horario
-  path('upload/', login_required(views.upload_schedule), name='upload_schedule'),
-  path('schedules/', login_required(views.ScheduleListView.as_view()), name='schedule_list'),
-  path('schedule-detail/',login_required(ScheduleDetailView.as_view()), name='schedule_detail'),
-  
-  #descargar csv dede un curso
-  path('generate_course_preview/<int:course_id>/', views.generate_course_preview, name='generate_course_preview'),
-  path('download_course_csv/<int:course_id>/', views.download_course_csv, name='download_course_csv'),
-  #sigiente curso
+    # path('attendance_report/', AttendanceReportView.as_view(), name='attendance_report'),
+    #csv
+    path('add-users-from-csv/', login_required(AddUsersFromCSVView.as_view()), name='add_users_from_csv'),
+    # delete usuarios
+    path('delete_user/<int:pk>/', DeleteUserView.as_view(), name='delete_user'),  
+    #horario
+    path('horario/', login_required(HorarioView.as_view()), name='weekly_schedule'),
+    # cambio de profesores por materia
+    path('edit-materia/', MateriaEditView.as_view(), name='materia_edit'),
+    #acerda del cole
+    #subir pdf de horario
+    path('upload/', login_required(views.upload_schedule), name='upload_schedule'),
+    path('schedules/', login_required(views.ScheduleListView.as_view()), name='schedule_list'),
+    path('schedule-detail/',login_required(ScheduleDetailView.as_view()), name='schedule_detail'),
+    
+    #descargar csv dede un curso
+    path('generate_course_preview/<int:course_id>/', views.generate_course_preview, name='generate_course_preview'),
+    path('download_course_csv/<int:course_id>/', views.download_course_csv, name='download_course_csv'),
+    #sigiente curso
 
-  path('generate-and-save-schedule-pdf/', views.generate_and_save_schedule_pdf, name='generate_and_save_schedule_pdf'),
-  #ver notas estudent
-  path('toggle-view-evolution/', ToggleViewEvolutionView.as_view(), name='toggle_view_evolution'),
-  path('sin_permiso/',login_required(SinPermisoView.as_view()), name='SinPermiso'),
-  #obtener alumnos course_detail
-  path('get_course_students/<int:course_id>/', views.get_course_students, name='get_course_students'),
-  # mover estudintes a otro curso
+    path('generate-and-save-schedule-pdf/', views.generate_and_save_schedule_pdf, name='generate_and_save_schedule_pdf'),
+    #ver notas estudent
+    path('toggle-view-evolution/', ToggleViewEvolutionView.as_view(), name='toggle_view_evolution'),
+    path('sin_permiso/',login_required(SinPermisoView.as_view()), name='SinPermiso'),
+    #obtener alumnos course_detail
+    path('get_course_students/<int:course_id>/', views.get_course_students, name='get_course_students'),
+    # mover estudintes a otro curso
+    path('move_students/', views.move_students_to_course, name='move_students'),
+    path('get_available_courses/<int:current_course_id>/', views.get_available_courses, name='get_available_courses'),
+    path('move-student/<int:course_id>/', MoveStudentView.as_view(), name='move_student'),
+    #books
+path('manage-books/', ManageBooksView.as_view(), name='manage_books'),
+path('add-book/', AddBookView.as_view(), name='add_book'),
+path('edit-book/<int:pk>/', EditBookView.as_view(), name='edit_book'),
+path('delete-book/<int:pk>/', DeleteBookView.as_view(), name='delete_book'),
+path('view-books/', ViewBooksView.as_view(), name='view_books'),
 
- path('move_students/', views.move_students_to_course, name='move_students'),
-path('get_available_courses/<int:current_course_id>/', views.get_available_courses, name='get_available_courses'),
-
-
- path('move-student/<int:course_id>/', MoveStudentView.as_view(), name='move_student'),
 
 ]
 

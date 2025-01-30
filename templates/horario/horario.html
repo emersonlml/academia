@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
 
 <!DOCTYPE html>
@@ -8,110 +9,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horario</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.css">
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10px; /* Reduce el tamaño de fuente */
-        }
-        th, td {
-            border: 1px solid #000;
-            text-align: center;
-            padding: 5px; /* Reduce el espacio interno */
-            min-height: 30px; /* Reduce la altura mínima */
-        }
-        .materia {
-            background-color: #007bff;
-            color: white;
-            padding: 2px 5px; /* Reduce el tamaño de las materias */
-            margin: 3px;
-            font-size: 10px; /* Ajusta el tamaño de fuente */
-            border-radius: 3px;
-            display: inline-block;
-        }
-        .number {
-            opacity: 0.1; 
-            position: absolute; 
-            top: 3px; 
-            left: 3px; 
-            font-size: 12px; 
-            z-index: 1;
-        }
-        #schedule-container {
-            width: 100%;
-            overflow: hidden;
-        }
-        .dropzone {
-            min-height: 50px;
-            background-color: #f9f9f9;
-            position: relative;
-        }
-        .materia {
-            background-color: #007bff;
-            color: white;
-            padding: 3px 8px;
-            margin: 5px;
-            cursor: grab;
-            border-radius: 4px;
-            font-size: 12px;
-            display: inline-block;
-        }
-        .number {
-            opacity: 0.1; 
-            position: absolute; 
-            top: 5px; 
-            left: 5px; 
-            font-size: 20px; 
-            z-index: 1; 
-        }
-        .caja {
-            margin:20px auto 40px auto;    
-            border:1px solid #d9d9d9;
-            height:30px;
-            overflow: hidden;
-            width: 230px;
-            position:relative;
-         }
-         select {
-            background: transparent;
-            border: none;
-            font-size: 14px;
-            height: 30px;
-            padding: 5px;
-            width: 250px;
-         }
-         select:focus{ outline: none;}
-         
-         .caja::after{
-             content:"\025be";
-             display:table-cell;
-             padding-top:7px;
-             text-align:center;
-             width:30px;
-             height:30px;
-             background-color:#d9d9d9;
-             position:absolute;
-             top:0;
-             right:0px;    
-             pointer-events: none;
-         }
-
-        /* Estilo de los checkboxes */
-        .form-check {
-            margin-right: 15px;
-            display: inline-block;
-        }
-
-        /* Estilo para la columna de números de horas */
-        td:first-child, th:first-child {
-            font-weight: bold;
-            background-color: #f0f0f0;
-        }
-    </style>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px; /* Reduce el tamaño de fuente */
+    }
+    
+    th, td {
+        border: 1px solid #000;
+        text-align: center;
+        padding: 5px; /* Reduce el espacio interno */
+        min-height: 30px; /* Reduce la altura mínima */
+    }
+    
+    .materia {
+        background-color: #007bff;
+        color: white;
+        padding: 3px 7px; /* Reduce el tamaño de las materias */
+        margin: 3px;
+        font-size: 10px; /* Ajusta el tamaño de fuente */
+        border-radius: 3px;
+        display: inline-block;
+    }
+    
+    .number {
+        opacity: 0.1;
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        font-size: 12px;
+        z-index: 1;
+    }
+    
+    #schedule-container {
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    .dropzone {
+        min-height: 50px;
+        background-color: #f9f9f9;
+        position: relative;
+    }
+    
+    .caja {
+        margin: 20px auto 40px auto;
+        border: 1px solid #d9d9d9;
+        height: 30px;
+        overflow: hidden;
+        width: 230px;
+        position: relative;
+    }
+    
+    select {
+        background: transparent;
+        border: none;
+        font-size: 14px;
+        height: 30px;
+        padding: 5px;
+        width: 250px;
+    }
+    
+    select:focus {
+        outline: none;
+    }
+    
+    .caja::after {
+        content: "\025be";
+        display: table-cell;
+        padding-top: 7px;
+        text-align: center;
+        width: 30px;
+        height: 30px;
+        background-color: #d9d9d9;
+        position: absolute;
+        top: 0;
+        right: 0px;
+        pointer-events: none;
+    }
+    
+    /* Estilo de los checkboxes */
+    .form-check {
+        margin-right: 15px;
+        display: inline-block;
+    }
+    
+    /* Estilo para la columna de números de horas */
+    td:first-child, th:first-child {
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }
+    
+</style>
 </head>
 <body>
 
-<h1>Horario Semanal <span id="course-name"></span></h1>
+<h1>Horario anual <span id="course-name"></span></h1>
 
 <!-- Seleccionar Curso -->
 <div>
@@ -124,19 +118,7 @@
     </select>
 </div>
 
-<!-- Listado de cursos con checkboxes -->
-<div class="d-flex justify-content-end">
-    <div>
-        {% for course in courses %}
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="{{ course.id }}" id="courseCheck{{ course.id }}">
-            <label class="form-check-label" for="courseCheck{{ course.id }}">
-                {{ course.name }}
-            </label>
-        </div>
-        {% endfor %}
-    </div>
-</div>
+
 
 <!-- Materias disponibles -->
 <div id="materias-list">
@@ -192,6 +174,8 @@
 
         // Actualiza el nombre del curso mostrado
         document.getElementById('course-name').textContent = courseName ? `- ${courseName}` : '';
+         // Limpia las drop zones
+        clearDropZones();
 
         // Llama a la vista para obtener las materias del curso seleccionado
         if (courseId) {
@@ -210,27 +194,48 @@
                 })
                 .catch(error => console.error('Error al obtener materias:', error));
         } else {
-            document.getElementById('materias').innerHTML = ''; // Limpia si no hay curso seleccionado
+            document.getElementById('materias').innerHTML = ''; 
         }
     }
-
-    // Inicializa Dragula para mover elementos de materias a la tabla
+    function clearDropZones() {
+        const dropzones = document.querySelectorAll('.dropzone');
+        dropzones.forEach(zone => {
+            zone.innerHTML = ''; 
+        });
+    }
     var materias = document.querySelector('#materias');
     var dropzones = document.querySelectorAll('.dropzone');
 
-    dragula([materias, ...dropzones])
-        .on('drop', function (el, target, source, sibling) {
-            if (target.classList.contains('dropzone')) {
-                var day = target.getAttribute('data-day');
-                var slot = target.getAttribute('data-slot');
-                var materiaId = el.getAttribute('data-id');
+    // Inicializa Dragula con configuraciones personalizadas
+    var drake = dragula([materias, ...dropzones], {
+        copy: true, 
+        copySortSource: false, 
+        accepts: function (el, target) {
+            return target.classList.contains('dropzone');
+        },
+        removeOnSpill: false, 
+        revertOnSpill: true, 
+    }).on('drag', function (el) {
+        el.classList.add('dragging');
+    }).on('drop', function (el, target, source) {
+        if (target) {
+            console.log(`Elemento ${el.textContent} soltado en ${target.getAttribute('data-day') || 'otro'}`);
+        }
+        el.classList.remove('dragging'); 
+    }).on('cancel', function (el, source) {
+        console.log(`Arrastre cancelado para ${el.textContent}`);
+        el.classList.remove('dragging'); 
+    });
 
-                // Clona el elemento para que se pueda arrastrar de nuevo
-                var newElement = el.cloneNode(true);
-                target.appendChild(newElement);
-                console.log(`Materia ${el.textContent} asignada a ${day} en la hora ${slot}`);
+    // Manejar el evento de presionar la tecla 'Esc' para cancelar el arrastre
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if (drake.dragging) {
+                drake.cancel(); // Cancela el arrastre activo
+                console.log('Arrastre cancelado con Escape');
             }
-        });
+        }
+    });
 
     // Función para generar el PDF del horario
     document.getElementById('generate-pdf').addEventListener('click', function () {
@@ -251,7 +256,7 @@
     });   
 </script>
 <!-- Botón para automatizar la generación y subida del PDF -->
-<button class="btn btn-success" id="auto-upload-pdf">Generar y Subir PDF</button>
+<button class="btn btn-success" id="auto-upload-pdf">Generar y Subir Horario</button>
 
 <script>
     document.getElementById('auto-upload-pdf').addEventListener('click', function () {

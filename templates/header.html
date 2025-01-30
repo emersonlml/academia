@@ -49,8 +49,7 @@
         {% if user.is_authenticated and user.is_superuser %}
              <li><a href="{% url 'attendance_prof' %}" class="nav-link px-2 text-white">Registro de Profesores</a></li>
              <li><a href="{% url 'weekly_schedule' %}" class="nav-link px-2 text-white">Horario</a></li>
-
-             <li><a href="{% url 'fin_anio' %}" class="nav-link px-2 text-white">Fin de año</a></li>
+             <li><a href="{% url 'manage_books' %}"class="nav-link px-2 text-white"> Libros </a></li>
 
         {% endif %}
 

@@ -172,3 +172,13 @@ class StudentDocument(models.Model):
 
     def __str__(self):
         return f"Documento de {self.history.student.username} ({self.description})"
+    
+#model libros
+class Book(models.Model):
+    title = models.CharField(max_length=200, verbose_name="Título")
+    description = models.TextField(blank=True, verbose_name="Categoria")
+    published_date = models.DateField(verbose_name="Fecha de publicación")
+    pdf = models.FileField(upload_to='books_pdfs/', verbose_name="Archivo PDF", blank=True, null=True)
+
+    def __str__(self):
+        return self.title

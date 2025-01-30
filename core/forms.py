@@ -58,6 +58,11 @@ class UserCreationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("El nombre de usuario ya está en uso. Por favor, elige otro.")
+        return username
         
 #form de teacher ateendence
 class AttendanceForm(forms.Form):
@@ -97,3 +102,20 @@ class ScheduleForm(forms.ModelForm):
     class Meta:
         model = Schedule
         fields = ['file']
+
+#form libros
+from .models import Book
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = ['title', 'description', 'published_date', 'pdf']
+        widgets = {
+            'published_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+        labels = {
+            'title': 'Título',
+            'description': 'Categoria',
+            'published_date': 'Fecha de publicación',
+            'pdf': 'Archivo PDF',
+        }

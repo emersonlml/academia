@@ -4,15 +4,106 @@
 <div class="container mt-5">
     <h2>Horario del Curso: {{ course.name }}</h2>
     
-    <h3>Archivos de Horario:</h3>
-    
-    <ul>
-        {% for schedule in schedules %}
-            <li>
-                <a href="{{ schedule.file.url }}" target="_blank">{{ schedule.name }}</a>
-                (Subido el: {{ schedule.uploaded_at }})
+    <div class="pdf-container">
+        <ul class="list-group">
+            {% for schedule in schedules %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{{ schedule.file.url }}" target="_blank" class="pdf-link">
+                    {{ schedule.name }}
+                </a>
+                <span class="text-muted">Subido el: {{ schedule.uploaded_at }}</span>
+                <!-- Vista previa del PDF -->
+                <div class="pdf-preview" data-file-url="{{ schedule.file.url }}">
+                    <canvas id="pdf-preview-{{ schedule.id }}" class="preview-canvas"></canvas>
+                </div>
             </li>
-        {% endfor %}
-    </ul>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
+
+<!-- Estilos personalizados -->
+<style>
+    .pdf-container {
+        margin-top: 20px;
+    }
+    
+    .list-group-item {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #f9f9f9;
+    }
+    
+    .pdf-preview {
+        width: 100px;
+        height: 100px;
+        overflow: hidden;
+        margin-left: 15px;
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .preview-canvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .pdf-link {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .pdf-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<!-- Script para la vista previa de los PDFs -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const pdfPreviews = document.querySelectorAll('.pdf-preview');
+        
+        pdfPreviews.forEach(function (previewElement) {
+            const fileUrl = previewElement.getAttribute('data-file-url');
+            const canvas = previewElement.querySelector('canvas');
+            
+            if (fileUrl && canvas) {
+                // Cargar y renderizar el PDF en el canvas
+                pdfjsLib.getDocument(fileUrl).promise.then(function (pdf) {
+                    // Obtener la primera página del PDF
+                    pdf.getPage(1).then(function (page) {
+                        const scale = 0.5; // Tamaño de la vista previa
+                        const viewport = page.getViewport({ scale: scale });
+                        
+                        // Preparar el contexto del canvas
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        // Renderizar la página en el canvas
+                        page.render({
+                            canvasContext: context,
+                            viewport: viewport
+                        });
+                    });
+                }).catch(function (error) {
+                    console.error('Error cargando el PDF:', error);
+                });
+            }
+        });
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
 {% endblock %}

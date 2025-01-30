@@ -48,7 +48,15 @@
 <body>
     <div class="container mt-4">
         <h5>Materias donde está inscrito</h5>
-        <a href="{% url 'schedule_detail' %}" class="btn btn-primary">Ver Horario del Curso</a>
+        <a class="btn btn-primary" href="{% url 'schedule_detail' %}">
+            <img src="{% static 'images/calendario.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+            Horario
+          </a>
+
+        <a class="btn btn-primary" href="{% url 'view_books' %}">
+            <img src="{% static 'images/libro.png' %}" alt="Classroom Icon" style="width: 20px; height: 20px; margin-right: 8px;">
+            Libros
+          </a>
         <!--history
                 <h2>Historial Académico de {{ student.first_name }} {{ student.last_name }}</h2>
 

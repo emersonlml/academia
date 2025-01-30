@@ -6,13 +6,14 @@
 
 <div class="container my-4">
     <h2>Crear Nuevo Usuario</h2>
-    {% if messages %}
-    <div class="alert alert-success" role="alert">
-        {% for message in messages %}
-            {{ message }}<br>
-        {% endfor %}
-    </div>
-{% endif %}
+            {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
     <div class="row">
         <div class="col-6 mx-auto">
             <div class="card">
@@ -88,6 +89,40 @@
         </div>
     </div>
 </div>
+<!-- Modal para mostrar errores -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error al Crear Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Se encontraron los siguientes errores:</p>
+                <ul>
+                    {% for field, errors in errors.items %}
+                        {% for error in errors %}
+                            <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mostrar el modal automáticamente si hay errores
+    document.addEventListener("DOMContentLoaded", function () {
+        {% if errors %}
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+        {% endif %}
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
