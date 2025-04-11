@@ -1,5 +1,10 @@
 """
 Autor: Emerson ibañez
+Fecha: 2025-04-10
+Descripción: 
+"""
+"""
+Autor: Emerson ibañez
 Fecha: 2025-01-30
 Descripción: 
 """
@@ -89,9 +94,13 @@ class Mark(models.Model):
             return None
 
     def save(self, *args, **kwargs):
-            if self.mark_1 or self.mark_2 or self.mark_3:
-                self.average = self.calculate_average()    
-            super().save(*args, **kwargs)
+        # Considerar solo si hay al menos una nota válida (no None)
+        valid_marks = [mark for mark in [self.mark_1, self.mark_2, self.mark_3] if mark is not None]
+        if valid_marks:
+            self.average = sum(valid_marks) / len(valid_marks)
+        else:
+            self.average = None  # Limpiar el promedio si no hay notas válidas
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Nota'
